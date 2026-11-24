@@ -4,6 +4,7 @@ import {
   Building2,
   CalendarCheck2,
   DatabaseBackup,
+  ClipboardPen,
   FileStack,
   Gauge,
   LayoutDashboard,
@@ -23,6 +24,7 @@ import type { FeedingSlot, Form, FormResponse } from "./types";
  * from this tree, and the "FORM AKTIF" group is derived from the Form objects.
  */
 export type NavTarget =
+  | { to: "/app" }
   | { to: "/admin" }
   | { to: "/admin/daily-report/indikator" }
   | { to: "/admin/daily-report/area" }
@@ -46,6 +48,8 @@ export interface NavLeaf {
   exact?: boolean;
   link: NavTarget;
   badge?: string | number;
+  /** Edit-only destinations; hidden from visitors in Mode Lihat. */
+  adminOnly?: boolean;
 }
 
 export interface NavItem extends NavLeaf {
@@ -60,7 +64,35 @@ export interface NavGroup {
   items: NavItem[];
 }
 
-export function buildAdminNavigation(forms: Form[], responses: FormResponse[]): NavGroup[] {
+export interface NavigationOptions {
+  /** False (default) = public Mode Lihat: admin-only entries are removed. */
+  isAdmin?: boolean;
+}
+
+export function buildAdminNavigation(
+  forms: Form[],
+  responses: FormResponse[],
+  options: NavigationOptions = {},
+): NavGroup[] {
+  const groups = buildFullNavigation(forms, responses);
+  if (options.isAdmin) return groups;
+  return groups.map((group) => ({
+    ...group,
+    items: group.items
+      .filter((item) => !item.adminOnly)
+      .map((item) => {
+        if (!item.children) return item;
+        const children = item.children.filter((child) => !child.adminOnly);
+        const first = children[0];
+        // A form entry for visitors opens its answers instead of the builder.
+        return first && item.adminOnly === undefined && item.id.startsWith("form-")
+          ? { ...item, link: first.link, children }
+          : { ...item, children };
+      }),
+  }));
+}
+
+function buildFullNavigation(forms: Form[], responses: FormResponse[]): NavGroup[] {
   const activeForms = forms
     .filter((form) => form.active)
     .sort((a, b) => (a.feedingSlot ?? 9) - (b.feedingSlot ?? 9) || b.updatedAt.localeCompare(a.updatedAt));
@@ -93,7 +125,7 @@ export function buildAdminNavigation(forms: Form[], responses: FormResponse[]): 
             { id: "dr-area", label: "Rekap Area", icon: MapIcon, path: "/admin/daily-report/area", link: { to: "/admin/daily-report/area" } },
             { id: "dr-cabang", label: "Rekap Cabang", icon: Building2, path: "/admin/daily-report/cabang", link: { to: "/admin/daily-report/cabang" } },
             { id: "dr-unit", label: "Kinerja Unit", icon: Trophy, path: "/admin/daily-report/unit", link: { to: "/admin/daily-report/unit" } },
-            { id: "dr-config", label: "Konfigurasi Daily Report", icon: SlidersHorizontal, path: "/admin/daily-report/config", link: { to: "/admin/daily-report/config" } },
+            { id: "dr-config", label: "Konfigurasi Daily Report", icon: SlidersHorizontal, path: "/admin/daily-report/config", link: { to: "/admin/daily-report/config" }, adminOnly: true },
           ],
         },
         {
@@ -104,6 +136,13 @@ export function buildAdminNavigation(forms: Form[], responses: FormResponse[]): 
           exact: true,
           link: { to: "/admin/forms" },
           badge: forms.length,
+        },
+        {
+          id: "respond",
+          label: "Isi Form (Kode)",
+          icon: ClipboardPen,
+          path: "/app",
+          link: { to: "/app" },
         },
       ],
     },
@@ -119,9 +158,9 @@ export function buildAdminNavigation(forms: Form[], responses: FormResponse[]): 
         path: `/admin/forms/${form.id}`,
         link: { to: "/admin/forms/$formId", params: { formId: form.id } },
         children: [
-          { id: `form-${form.id}-builder`, label: "Builder", icon: PencilRuler, path: `/admin/forms/${form.id}`, exact: true, link: { to: "/admin/forms/$formId", params: { formId: form.id } } },
+          { id: `form-${form.id}-builder`, label: "Builder", icon: PencilRuler, path: `/admin/forms/${form.id}`, exact: true, link: { to: "/admin/forms/$formId", params: { formId: form.id } }, adminOnly: true },
           { id: `form-${form.id}-jawaban`, label: "Jawaban", icon: BarChart3, path: `/admin/forms/${form.id}/jawaban`, link: { to: "/admin/forms/$formId/jawaban", params: { formId: form.id } }, badge: responseCount.get(form.id) ?? 0 },
-          { id: `form-${form.id}-settings`, label: "Pengaturan", icon: Settings2, path: `/admin/forms/${form.id}/pengaturan`, link: { to: "/admin/forms/$formId/pengaturan", params: { formId: form.id } } },
+          { id: `form-${form.id}-settings`, label: "Pengaturan", icon: Settings2, path: `/admin/forms/${form.id}/pengaturan`, link: { to: "/admin/forms/$formId/pengaturan", params: { formId: form.id } }, adminOnly: true },
         ],
       })),
     },
@@ -129,9 +168,9 @@ export function buildAdminNavigation(forms: Form[], responses: FormResponse[]): 
       id: "system",
       label: "Sistem & Integrasi",
       items: [
-        { id: "theme", label: "Tema & Branding", icon: Palette, path: "/admin/settings/theme", link: { to: "/admin/settings/theme" } },
-        { id: "integrations", label: "Integrasi & Backup", icon: DatabaseBackup, path: "/admin/settings/integrasi", link: { to: "/admin/settings/integrasi" } },
-        { id: "access", label: "Akun & Akses", icon: ShieldCheck, path: "/admin/users", link: { to: "/admin/users" } },
+        { id: "theme", label: "Tema & Branding", icon: Palette, path: "/admin/settings/theme", link: { to: "/admin/settings/theme" }, adminOnly: true },
+        { id: "integrations", label: "Integrasi & Backup", icon: DatabaseBackup, path: "/admin/settings/integrasi", link: { to: "/admin/settings/integrasi" }, adminOnly: true },
+        { id: "access", label: "Akun & Akses", icon: ShieldCheck, path: "/admin/users", link: { to: "/admin/users" }, adminOnly: true },
       ],
     },
   ];

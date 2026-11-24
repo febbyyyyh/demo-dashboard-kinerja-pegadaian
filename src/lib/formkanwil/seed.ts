@@ -34,18 +34,29 @@ export function createDefaultIntegrations(): IntegrationSettings {
   return { sheetsUrl: "", sheetsConnected: false, lastSyncAt: null };
 }
 
+/*
+ * Initial admin credential (admin / the password chosen by Kanwil), stored only as a salted
+ * SHA-256 hash. Browser-local until Cloud auth replaces it; change it in Akun & Akses.
+ */
+export const DEFAULT_ADMIN_USERNAME = "admin";
+export const DEFAULT_ADMIN_PASSWORD_SALT = "fk-kanwil-manado-v1";
+export const DEFAULT_ADMIN_PASSWORD_HASH =
+  "2d1c845c81b002be34d33e11cdcc47d1913145a7ab567049d1b3055a98feb1d9";
+
 export function createInitialDatabase(): Database {
   return {
     version: 1,
     users: [
       {
         id: "usr_admin",
-        username: "admin",
+        username: DEFAULT_ADMIN_USERNAME,
         name: "Admin Kanwil",
         email: "admin@kanwil.pegadaian.co.id",
         role: "admin",
         active: true,
-        provider: "google",
+        provider: "password",
+        passwordHash: DEFAULT_ADMIN_PASSWORD_HASH,
+        passwordSalt: DEFAULT_ADMIN_PASSWORD_SALT,
         createdAt: new Date().toISOString(),
       },
     ],
@@ -55,5 +66,7 @@ export function createInitialDatabase(): Database {
     theme: createDefaultTheme(),
     integrations: createDefaultIntegrations(),
     backups: [],
+    dashboardLayout: [],
+    dailyReportLayout: [],
   };
 }

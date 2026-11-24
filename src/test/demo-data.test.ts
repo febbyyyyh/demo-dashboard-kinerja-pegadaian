@@ -27,24 +27,52 @@ describe("FormKanwil initial data", () => {
     expect(database).not.toHaveProperty("units");
   });
 
-  it("stores no admin password; the admin signs in with Google", () => {
+  it("stores the admin password only as a salted hash", () => {
     const [admin] = createInitialDatabase().users;
     expect(admin).toBeDefined();
     expect(admin).not.toHaveProperty("password");
-    expect(admin?.provider).toBe("google");
+    expect(admin?.provider).toBe("password");
+    expect(admin?.username).toBe("admin");
+    expect(JSON.stringify(admin)).not.toContain("Kanwil@2026");
   });
 
-  it("signs in only as the single administrator in demo Google mode", async () => {
+  it("signs in the admin with admin / Kanwil@2026 and rejects a wrong password", async () => {
     vi.resetModules();
     const { auth: freshAuth } = await import("@/lib/formkanwil/auth");
     const { getSessionUserId } = await import("@/lib/formkanwil/store");
-    const result = await freshAuth.signInWithGoogle();
-    expect(result).toMatchObject({ ok: true, demo: true, user: { role: "admin" } });
-    expect(getSessionUserId()).toBe("usr_admin");
-    await freshAuth.signOut();
-    expect(getSessionUserId()).toBeNull();
-    sessionStorage.clear();
-    localStorage.clear();
+    try {
+      const wrong = await freshAuth.signIn({ username: "admin", password: "admin123" });
+      expect(wrong).toEqual({ ok: false, error: "Username atau password salah." });
+      expect(getSessionUserId()).toBeNull();
+
+      const result = await freshAuth.signIn({ username: "Admin", password: "Kanwil@2026" });
+      expect(result).toMatchObject({ ok: true, user: { role: "admin" } });
+      expect(getSessionUserId()).toBe("usr_admin");
+      await freshAuth.signOut();
+      expect(getSessionUserId()).toBeNull();
+    } finally {
+      sessionStorage.clear();
+      localStorage.clear();
+    }
+  });
+
+  it("lets the admin change username and password; the old password stops working", async () => {
+    vi.resetModules();
+    const { auth: freshAuth } = await import("@/lib/formkanwil/auth");
+    try {
+      const update = await freshAuth.updateCredentials("usr_admin", {
+        currentPassword: "Kanwil@2026",
+        username: "kanwil.admin",
+        newPassword: "BaruSekali99",
+        confirmPassword: "BaruSekali99",
+      });
+      expect(update).toEqual({ ok: true });
+      expect((await freshAuth.signIn({ username: "admin", password: "Kanwil@2026" })).ok).toBe(false);
+      expect((await freshAuth.signIn({ username: "kanwil.admin", password: "BaruSekali99" })).ok).toBe(true);
+    } finally {
+      sessionStorage.clear();
+      localStorage.clear();
+    }
   });
 
   it("drops a legacy stored password when loading old browser data", async () => {
@@ -58,6 +86,7 @@ describe("FormKanwil initial data", () => {
       const { getDb } = await import("@/lib/formkanwil/store");
       expect(getDb().users[0]).not.toHaveProperty("password");
       expect(localStorage.getItem("formkanwil:db:v6")).not.toContain("admin123");
+      expect(getDb().users[0]?.passwordHash).toBeTruthy();
     } finally {
       localStorage.clear();
     }

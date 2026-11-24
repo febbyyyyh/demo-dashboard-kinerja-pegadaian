@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { Bell, CloudCheck, FileUp, LogOut, Palette, Plus, Search, ShieldCheck } from "lucide-react";
+import { Bell, CloudCheck, FileUp, Lock, LogOut, Palette, Plus, Search, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
+import { AdminOnly, useAdminAccess, ViewModeBadge } from "@/components/fk/access/AdminAccess";
 import { initialsOf } from "@/components/fk/AppSidebar";
 import { UpcListImportDialog } from "@/components/fk/UpcListImportDialog";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { auth } from "@/lib/formkanwil/auth";
-import { useCurrentUser, useForms, useIntegrations, useResponses } from "@/lib/formkanwil/hooks";
+import { useForms, useIntegrations, useResponses } from "@/lib/formkanwil/hooks";
 import { buildAdminNavigation, type NavTarget } from "@/lib/formkanwil/navigation";
 import { repository } from "@/lib/formkanwil/repository";
 import type { ImportedChoices } from "@/lib/formkanwil/upc-import";
@@ -73,7 +74,7 @@ export function useQuickActions() {
 
 export function AdminTopbar() {
   const navigate = useNavigate();
-  const user = useCurrentUser();
+  const { user, isAdmin, openLogin } = useAdminAccess();
   const forms = useForms();
   const responses = useResponses();
   const { settings, backups } = useIntegrations();
@@ -92,7 +93,7 @@ export function AdminTopbar() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const groups = useMemo(() => buildAdminNavigation(forms, responses), [forms, responses]);
+  const groups = useMemo(() => buildAdminNavigation(forms, responses, { isAdmin }), [forms, responses, isAdmin]);
   const latestResponses = useMemo(
     () => [...responses].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt)).slice(0, 6),
     [responses],
@@ -126,6 +127,7 @@ export function AdminTopbar() {
       </button>
 
       <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <ViewModeBadge className="hidden sm:inline-flex" />
         <div
           className="hidden items-center gap-2 rounded-xl px-2 text-xs text-muted-foreground xl:flex"
           title="Status sinkronisasi terakhir"
@@ -138,17 +140,19 @@ export function AdminTopbar() {
           {lastSync ? `Sinkron ${relative(lastSync)}` : "Belum pernah sinkron"}
         </div>
 
-        <UpcListImportDialog
-          onImport={actions.createFromUpc}
-          trigger={
-            <Button variant="outline" size="sm" className="hidden h-9 md:inline-flex">
-              <FileUp /> Import UPC
-            </Button>
-          }
-        />
-        <Button size="sm" className="h-9" onClick={actions.createForm}>
-          <Plus /> <span className="hidden sm:inline">Buat Form</span>
-        </Button>
+        <AdminOnly>
+          <UpcListImportDialog
+            onImport={actions.createFromUpc}
+            trigger={
+              <Button variant="outline" size="sm" className="hidden h-9 md:inline-flex">
+                <FileUp /> Import UPC
+              </Button>
+            }
+          />
+          <Button size="sm" className="h-9" onClick={actions.createForm}>
+            <Plus /> <span className="hidden sm:inline">Buat Form</span>
+          </Button>
+        </AdminOnly>
 
         <Popover>
           <PopoverTrigger asChild>
@@ -197,6 +201,11 @@ export function AdminTopbar() {
           </PopoverContent>
         </Popover>
 
+        {!user && (
+          <Button size="sm" className="h-9" onClick={openLogin}>
+            <Lock /> <span className="hidden sm:inline">Login Admin</span>
+          </Button>
+        )}
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -210,8 +219,11 @@ export function AdminTopbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-60 rounded-xl">
               <DropdownMenuLabel className="font-normal">
-                <div className="text-sm font-semibold">{user.name}</div>
-                <div className="truncate text-xs text-muted-foreground">{user.email}</div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate text-sm font-semibold">{user.name}</span>
+                  <span className="pill bg-lime text-primary-deep">Admin Mode</span>
+                </div>
+                <div className="truncate text-xs text-muted-foreground">@{user.username}</div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => navigate({ to: "/admin/users" })}>
@@ -224,10 +236,11 @@ export function AdminTopbar() {
               <DropdownMenuItem
                 onSelect={async () => {
                   await auth.signOut();
-                  navigate({ to: "/", replace: true });
+                  toast.info("Kamu keluar dari Admin Mode", { description: "Dashboard tetap bisa dilihat." });
+                  navigate({ to: "/admin", replace: true });
                 }}
               >
-                <LogOut /> Keluar
+                <LogOut /> Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -239,14 +252,25 @@ export function AdminTopbar() {
         <CommandList>
           <CommandEmpty>Tidak ada yang cocok.</CommandEmpty>
           <CommandGroup heading="Aksi cepat">
-            <CommandItem
-              onSelect={() => {
-                setPaletteOpen(false);
-                actions.createForm();
-              }}
-            >
-              <Plus /> Buat form baru
-            </CommandItem>
+            {isAdmin ? (
+              <CommandItem
+                onSelect={() => {
+                  setPaletteOpen(false);
+                  actions.createForm();
+                }}
+              >
+                <Plus /> Buat form baru
+              </CommandItem>
+            ) : (
+              <CommandItem
+                onSelect={() => {
+                  setPaletteOpen(false);
+                  openLogin();
+                }}
+              >
+                <Lock /> Login Admin
+              </CommandItem>
+            )}
           </CommandGroup>
           <CommandSeparator />
           {groups
@@ -269,7 +293,9 @@ export function AdminTopbar() {
                 <CommandItem
                   key={form.id}
                   value={`${form.title} ${form.code}`}
-                  onSelect={() => go({ to: "/admin/forms/$formId", params: { formId: form.id } })}
+                  onSelect={() =>
+                    go({ to: isAdmin ? "/admin/forms/$formId" : "/admin/forms/$formId/jawaban", params: { formId: form.id } })
+                  }
                 >
                   <span>{form.emoji}</span>
                   <span className="flex-1 truncate">{form.title || "Form tanpa judul"}</span>

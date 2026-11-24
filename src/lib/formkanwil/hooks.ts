@@ -1,6 +1,6 @@
 import { useDb } from "./store";
 
-export { useCurrentUser } from "./store";
+export { useCurrentUser, useIsAdmin } from "./store";
 
 /* Read hooks over the active data source. Swap the internals when the Cloud adapter lands. */
 

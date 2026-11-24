@@ -8,6 +8,8 @@ import type {
   DailyReportConfig,
   Form,
   IntegrationSettings,
+  LayoutKey,
+  LayoutWidget,
   ThemeSettings,
 } from "./types";
 import type { RespondentIdentity } from "./logic";
@@ -35,6 +37,11 @@ export interface FormKanwilRepository {
   };
   theme: {
     save(theme: ThemeSettings): void;
+  };
+  layout: {
+    /** Persists the "Atur Tampilan" JSON layout; an empty array restores the default. */
+    save(key: LayoutKey, widgets: LayoutWidget[]): void;
+    reset(key: LayoutKey): void;
   };
   integrations: {
     save(settings: IntegrationSettings): void;
@@ -125,6 +132,15 @@ function createLocalRepository(): FormKanwilRepository {
     theme: {
       save(theme) {
         setDb((d) => ({ ...d, theme }));
+      },
+    },
+    layout: {
+      save(key, widgets) {
+        const clean = widgets.map((item, order) => ({ ...item, order }));
+        setDb((d) => ({ ...d, [key]: clean }));
+      },
+      reset(key) {
+        setDb((d) => ({ ...d, [key]: [] }));
       },
     },
     integrations: {

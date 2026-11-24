@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from "react";
 
 import {
+  DEFAULT_ADMIN_PASSWORD_HASH,
+  DEFAULT_ADMIN_PASSWORD_SALT,
   createDefaultDailyReportConfig,
   createDefaultIntegrations,
   createDefaultTheme,
@@ -23,7 +25,10 @@ let dbCache: Database | null = null;
 let sessionCache: string | null | undefined;
 const listeners = new Set<() => void>();
 
-type PreviousDatabase = Omit<Database, "users" | "dailyReport" | "theme" | "integrations" | "backups"> & {
+type PreviousDatabase = Omit<
+  Database,
+  "users" | "dailyReport" | "theme" | "integrations" | "backups" | "dashboardLayout" | "dailyReportLayout"
+> & {
   users: Array<User & { unit?: string }>;
   units?: string[];
 };
@@ -54,16 +59,24 @@ function addRespondentIdentity(database: Database): Database {
   };
 }
 
-/** Fills settings added after v6 and strips the legacy stored password. */
+/**
+ * Fills settings added after v6, strips the legacy plain-text password and gives an admin
+ * without a password hash (Google-era data) the initial credential.
+ */
 function withDefaults(database: Partial<Database> & Pick<Database, "users" | "forms" | "responses">): Database {
   const dailyDefaults = createDefaultDailyReportConfig();
   const daily = database.dailyReport ?? dailyDefaults;
   return {
     version: 1,
     users: database.users.map((user) => {
-      if (user.password === undefined) return user;
+      if (user.password === undefined && (user.role !== "admin" || user.passwordHash)) return user;
       const clean = { ...user };
       delete clean.password;
+      if (clean.role === "admin" && !clean.passwordHash) {
+        clean.passwordHash = DEFAULT_ADMIN_PASSWORD_HASH;
+        clean.passwordSalt = DEFAULT_ADMIN_PASSWORD_SALT;
+        clean.provider = "password";
+      }
       return clean;
     }),
     forms: database.forms,
@@ -79,6 +92,8 @@ function withDefaults(database: Partial<Database> & Pick<Database, "users" | "fo
     theme: { ...createDefaultTheme(), ...database.theme },
     integrations: { ...createDefaultIntegrations(), ...database.integrations },
     backups: database.backups ?? [],
+    dashboardLayout: database.dashboardLayout ?? [],
+    dailyReportLayout: database.dailyReportLayout ?? [],
   };
 }
 
@@ -188,4 +203,9 @@ export function useCurrentUser(): User | null {
 
 export function homePathFor(user: User): "/admin" | "/app" {
   return user.role === "admin" ? "/admin" : "/app";
+}
+
+/** True only while an active admin session exists in this browser tab. */
+export function useIsAdmin(): boolean {
+  return useCurrentUser()?.role === "admin";
 }

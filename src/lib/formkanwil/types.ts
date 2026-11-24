@@ -10,8 +10,11 @@ export interface User {
   tagline?: string;
   role: Role;
   active: boolean;
-  /** Identity provider used to sign in. Google OAuth replaces the old password login. */
-  provider?: "google";
+  /** SHA-256 hex of `${passwordSalt}:${password}`; checked only inside auth.ts. */
+  passwordHash?: string;
+  passwordSalt?: string;
+  /** Identity provider used to sign in. */
+  provider?: "password" | "google";
   avatarUrl?: string;
   createdAt: string;
 }
@@ -147,6 +150,37 @@ export interface BackupLog {
   note?: string;
 }
 
+/* ---------------- Layout (Atur Tampilan) ---------------- */
+
+export type WidgetSpan = "1/4" | "1/2" | "2/3" | "full";
+
+export type DashboardWidgetType =
+  | "kpi-responses"
+  | "kpi-forms"
+  | "kpi-active"
+  | "kpi-draft"
+  | "chart-daily"
+  | "daily-summary"
+  | "daily-indicators"
+  | "recent-forms"
+  | "backup";
+
+/** Daily Report widgets are the indicator cards; their id is the metric id. */
+export type LayoutWidgetType = DashboardWidgetType | "metric-card";
+
+export interface LayoutWidget {
+  id: string;
+  type: LayoutWidgetType;
+  title: string;
+  subtitle: string;
+  colSpan: WidgetSpan;
+  order: number;
+  visible: boolean;
+  config: Record<string, string | number | boolean>;
+}
+
+export type LayoutKey = "dashboardLayout" | "dailyReportLayout";
+
 export interface Database {
   version: 1;
   users: User[];
@@ -156,6 +190,9 @@ export interface Database {
   theme: ThemeSettings;
   integrations: IntegrationSettings;
   backups: BackupLog[];
+  /** Empty array = use the default layout. */
+  dashboardLayout: LayoutWidget[];
+  dailyReportLayout: LayoutWidget[];
 }
 
 export const QUESTION_TYPE_LABEL: Record<QuestionType, string> = {

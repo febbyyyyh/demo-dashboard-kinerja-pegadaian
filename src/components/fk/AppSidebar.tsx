@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, LogOut, Palette, ShieldCheck } from "lucide-react";
+import { ChevronRight, Lock, LogOut, Palette, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 
+import { useAdminAccess } from "@/components/fk/access/AdminAccess";
 import { NavAnchor } from "@/components/fk/NavAnchor";
 import { PegadaianLogo } from "@/components/fk/Logo";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -31,7 +33,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { auth } from "@/lib/formkanwil/auth";
-import { useCurrentUser, useForms, useResponses } from "@/lib/formkanwil/hooks";
+import { useForms, useResponses } from "@/lib/formkanwil/hooks";
 import {
   buildAdminNavigation,
   isNavActive,
@@ -206,9 +208,9 @@ export function AppSidebar() {
   const { pathname } = useLocation();
   const forms = useForms();
   const responses = useResponses();
-  const user = useCurrentUser();
+  const { user, isAdmin, openLogin } = useAdminAccess();
   const navigate = useNavigate();
-  const groups = buildAdminNavigation(forms, responses);
+  const groups = buildAdminNavigation(forms, responses, { isAdmin });
 
   return (
     <Sidebar collapsible="icon" className="border-sidebar-border">
@@ -254,6 +256,20 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-2">
+        {!user && (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={openLogin}
+                tooltip="Login Admin"
+                className="h-11 rounded-xl border border-primary/30 bg-card px-3 font-semibold text-primary hover:bg-mint-soft group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!p-3"
+              >
+                <Lock />
+                <span>Login Admin</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -268,14 +284,14 @@ export function AppSidebar() {
                   <span className="block truncate text-sm font-semibold text-foreground">
                     {user.name}
                   </span>
-                  <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
+                  <span className="block truncate text-xs font-semibold text-primary">Admin Mode</span>
                 </span>
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="right" align="end" className="w-56 rounded-xl">
               <DropdownMenuLabel className="font-normal">
                 <div className="text-sm font-semibold">{user.name}</div>
-                <div className="text-xs text-muted-foreground">Administrator · Google</div>
+                <div className="text-xs text-muted-foreground">Administrator · @{user.username}</div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => navigate({ to: "/admin/users" })}>
@@ -289,10 +305,11 @@ export function AppSidebar() {
                 className={cn("text-destructive-foreground focus:bg-destructive-soft")}
                 onSelect={async () => {
                   await auth.signOut();
-                  navigate({ to: "/", replace: true });
+                  toast.info("Kamu keluar dari Admin Mode", { description: "Dashboard tetap bisa dilihat." });
+                  navigate({ to: "/admin", replace: true });
                 }}
               >
-                <LogOut /> Keluar
+                <LogOut /> Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
