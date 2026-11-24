@@ -8,11 +8,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* FormKanwil design system — fresh green, playful, premium internal-corporate. */
+/*
+ * FormKanwil design system — Pegadaian emerald enterprise dashboard.
+ * Brand colours are runtime CSS variables (--primary, --primary-deep, --primary-glow, --lime,
+ * --font-ui) written by src/lib/formkanwil/theme.ts; everything else derives from them, so the
+ * Theme & Branding page re-skins the whole app live.
+ */
 
 @theme inline {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -31,6 +36,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-deep: var(--primary-deep);
   --color-primary-glow: var(--primary-glow);
+  --color-lime: var(--lime);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -40,6 +46,10 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive-soft: var(--destructive-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
   --color-mint: var(--mint);
   --color-mint-soft: var(--mint-soft);
   --color-mint-foreground: var(--mint-foreground);
@@ -48,6 +58,9 @@
   --color-gold-foreground: var(--gold-foreground);
   --color-violet: var(--violet);
   --color-navy: var(--navy);
+  --color-canvas: var(--background);
+  --color-on-hero: var(--on-hero);
+  --color-on-hero-muted: var(--on-hero-muted);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -73,73 +86,98 @@
 
 :root {
   --radius: 0.75rem;
+  --font-ui: "Plus Jakarta Sans";
 
-  /* Brand */
-  --primary: oklch(0.622 0.133 162.3); /* #0E9F6E */
-  --primary-deep: oklch(0.514 0.108 163.1); /* #0B7A55 */
-  --primary-glow: oklch(0.773 0.153 163.2); /* #34D399 */
+  /* Brand (runtime-overridable) */
+  --primary: oklch(0.471 0.104 157.2); /* #146C43 */
+  --primary-deep: oklch(0.386 0.083 157.5); /* #0F5132 */
+  --primary-glow: oklch(0.8 0.182 151.7); /* #4ADE80 */
+  --lime: oklch(0.938 0.122 124.3); /* #D9F99D */
   --primary-foreground: oklch(1 0 0);
-  --mint: oklch(0.905 0.089 164.2); /* #A7F3D0 */
-  --mint-soft: oklch(0.95 0.051 163.1); /* #D1FAE5 */
-  --mint-foreground: oklch(0.432 0.086 166.9); /* #065F46 */
-  --gold: oklch(0.856 0.123 84.6); /* #F5C96B */
-  --gold-soft: oklch(0.96 0.045 88);
-  --gold-foreground: oklch(0.45 0.09 70);
-  --violet: oklch(0.709 0.159 293.5); /* #A78BFA */
-  --navy: oklch(0.245 0.084 263.5); /* #0A1D48 */
+
+  /* Derived brand tints */
+  --mint: color-mix(in oklab, var(--primary) 22%, white);
+  --mint-soft: color-mix(in oklab, var(--primary) 9%, white);
+  --mint-foreground: var(--primary-deep);
+  --gold: oklch(0.769 0.165 70.1);
+  --gold-soft: oklch(0.962 0.058 95.6);
+  --gold-foreground: oklch(0.45 0.09 60);
+  --violet: oklch(0.709 0.159 293.5);
+  --navy: oklch(0.208 0.04 265.8); /* #0F172A */
+  --success: var(--primary);
+  --success-soft: var(--mint-soft);
+  --warning: oklch(0.769 0.165 70.1);
+  --warning-soft: oklch(0.962 0.058 95.6);
+  --on-hero: oklch(1 0 0);
+  --on-hero-muted: oklch(1 0 0 / 72%);
 
   /* Surfaces */
-  --background: oklch(0.982 0.018 155.8); /* #F0FDF4 */
-  --foreground: oklch(0.245 0.084 263.5);
+  --background: oklch(0.977 0.002 165.1); /* #F6F8F7 */
+  --foreground: oklch(0.208 0.04 265.8); /* #0F172A */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.245 0.084 263.5);
+  --card-foreground: oklch(0.208 0.04 265.8);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.245 0.084 263.5);
-  --secondary: oklch(0.95 0.051 163.1);
-  --secondary-foreground: oklch(0.432 0.086 166.9);
-  --muted: oklch(0.965 0.02 160);
-  --muted-foreground: oklch(0.52 0.031 246.7); /* #5B6B7A */
-  --accent: oklch(0.95 0.051 163.1);
-  --accent-foreground: oklch(0.432 0.086 166.9);
-  --destructive: oklch(0.711 0.166 22.2); /* #F87171 */
+  --popover-foreground: oklch(0.208 0.04 265.8);
+  --secondary: var(--mint-soft);
+  --secondary-foreground: var(--primary-deep);
+  --muted: oklch(0.96 0.004 165);
+  --muted-foreground: oklch(0.554 0.041 257.4); /* #64748B */
+  --accent: var(--mint-soft);
+  --accent-foreground: var(--primary-deep);
+  --destructive: oklch(0.577 0.215 27.3);
   --destructive-foreground: oklch(0.45 0.15 25);
   --destructive-soft: oklch(0.965 0.025 20);
-  --border: oklch(0.95 0.051 163.1); /* #D1FAE5 */
-  --input: oklch(0.928 0.006 264.5);
-  --ring: oklch(0.622 0.133 162.3);
+  --border: oklch(0.932 0.007 160.1); /* #E5EAE7 */
+  --input: oklch(0.932 0.007 160.1);
+  --ring: var(--primary);
 
-  --chart-1: oklch(0.622 0.133 162.3);
-  --chart-2: oklch(0.709 0.159 293.5);
-  --chart-3: oklch(0.856 0.123 84.6);
-  --chart-4: oklch(0.773 0.153 163.2);
-  --chart-5: oklch(0.245 0.084 263.5);
+  --chart-1: var(--primary);
+  --chart-2: var(--primary-glow);
+  --chart-3: var(--lime);
+  --chart-4: var(--primary-deep);
+  --chart-5: oklch(0.769 0.165 70.1);
 
   --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.245 0.084 263.5);
-  --sidebar-primary: oklch(0.622 0.133 162.3);
+  --sidebar-foreground: oklch(0.372 0.039 257.3);
+  --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.95 0.051 163.1);
-  --sidebar-accent-foreground: oklch(0.432 0.086 166.9);
-  --sidebar-border: oklch(0.95 0.051 163.1);
-  --sidebar-ring: oklch(0.622 0.133 162.3);
+  --sidebar-accent: var(--mint-soft);
+  --sidebar-accent-foreground: var(--primary-deep);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--primary);
 
   /* Effects */
-  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-glow) 100%);
-  --gradient-page: linear-gradient(180deg, var(--background) 0%, oklch(1 0 0) 100%);
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+  --gradient-hero-card: radial-gradient(
+      120% 90% at 100% 0%,
+      color-mix(in oklab, var(--primary-glow) 38%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(140deg, var(--primary-deep) 0%, var(--primary) 100%);
+  --gradient-progress: linear-gradient(90deg, var(--lime) 0%, var(--primary-glow) 50%, var(--primary-deep) 100%);
+  --gradient-page: linear-gradient(180deg, var(--background) 0%, var(--background) 100%);
   --gradient-hero: radial-gradient(
       120% 80% at 0% 0%,
-      color-mix(in oklab, var(--mint) 70%, transparent) 0%,
+      color-mix(in oklab, var(--lime) 55%, transparent) 0%,
       transparent 60%
     ),
     radial-gradient(
       90% 70% at 100% 10%,
-      color-mix(in oklab, var(--gold) 25%, transparent) 0%,
+      color-mix(in oklab, var(--primary-glow) 18%, transparent) 0%,
       transparent 55%
     ),
     linear-gradient(180deg, var(--background) 0%, oklch(1 0 0) 100%);
-  --shadow-green: 0 10px 24px -10px color-mix(in oklab, var(--primary) 65%, transparent);
-  --shadow-soft: 0 1px 2px 0 color-mix(in oklab, var(--navy) 6%, transparent);
-  --shadow-hover: 0 14px 30px -14px color-mix(in oklab, var(--navy) 22%, transparent);
+  --gradient-auth: radial-gradient(
+      90% 70% at 15% 10%,
+      color-mix(in oklab, var(--primary-glow) 35%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(80% 60% at 90% 95%, color-mix(in oklab, var(--lime) 30%, transparent) 0%, transparent 60%),
+    linear-gradient(160deg, var(--primary-deep) 0%, var(--primary) 100%);
+  --shadow-green: 0 10px 24px -12px color-mix(in oklab, var(--primary) 60%, transparent);
+  --shadow-soft: 0 1px 2px 0 color-mix(in oklab, var(--navy) 5%, transparent),
+    0 1px 1px 0 color-mix(in oklab, var(--navy) 3%, transparent);
+  --shadow-hover: 0 14px 30px -16px color-mix(in oklab, var(--navy) 24%, transparent);
 }
 
 @layer base {
@@ -160,6 +198,10 @@
   h4 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--primary-glow) 35%, transparent);
   }
 }
 
@@ -189,6 +231,55 @@
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) + 8px);
   box-shadow: var(--shadow-soft);
+}
+
+/* Bento panel: white surface, rounded-2xl, hairline border. */
+@utility panel {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 8px);
+  box-shadow: var(--shadow-soft);
+}
+
+@utility bg-gradient-hero-card {
+  background-image: var(--gradient-hero-card);
+}
+
+@utility bg-gradient-progress {
+  background-image: var(--gradient-progress);
+}
+
+@utility bg-gradient-auth {
+  background-image: var(--gradient-auth);
+}
+
+/* Soft diagonal hatching for targets / empty days. */
+@utility bg-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in oklab, var(--primary) 16%, transparent) 0 2px,
+    transparent 2px 7px
+  );
+}
+
+@utility eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+@utility pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.125rem;
+  font-variant-numeric: tabular-nums;
 }
 
 @utility card-hover {

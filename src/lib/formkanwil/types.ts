@@ -3,12 +3,16 @@ export type Role = "admin" | "user";
 export interface User {
   id: string;
   username: string;
-  password: string;
+  /** Legacy field from the old password login. Stripped on load; never set again. */
+  password?: string;
   name: string;
   email: string;
   tagline?: string;
   role: Role;
   active: boolean;
+  /** Identity provider used to sign in. Google OAuth replaces the old password login. */
+  provider?: "google";
+  avatarUrl?: string;
   createdAt: string;
 }
 
@@ -32,6 +36,9 @@ export interface FormPage {
   title: string;
 }
 
+/** A form can feed the Daily Report through one of two slots. */
+export type FeedingSlot = 1 | 2;
+
 export interface Form {
   id: string;
   code: string;
@@ -42,6 +49,10 @@ export interface Form {
   status?: "draft" | "active" | "closed";
   pages?: FormPage[];
   questions: Question[];
+  /** Which Daily Report feed this form supplies, if any. */
+  feedingSlot?: FeedingSlot | null;
+  /** Bumped every time the question structure changes (used by Sheets backup columns). */
+  schemaVersion?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -59,11 +70,92 @@ export interface FormResponse {
   submittedAt: string;
 }
 
+/* ---------------- Daily Report ---------------- */
+
+export type MetricAggregation = "sum" | "avg" | "count";
+
+export interface MetricViews {
+  indicator: boolean;
+  area: boolean;
+  branch: boolean;
+  unit: boolean;
+}
+
+export interface DailyMetric {
+  id: string;
+  name: string;
+  /** Display unit, e.g. "Rp", "%", "Nasabah", "Unit". */
+  unit: string;
+  slot: FeedingSlot;
+  /** Question in the feeding form whose answers produce the value (not needed for "count"). */
+  questionId: string | null;
+  aggregation: MetricAggregation;
+  /** Target per unit for the selected period; null = no target. */
+  target: number | null;
+  views: MetricViews;
+}
+
+/** How a feeding form identifies the reporting unit (UPC) and its branch/area. */
+export interface FeedingSourceMapping {
+  slot: FeedingSlot;
+  unitQuestionId: string | null;
+  areaColumn: string | null;
+  branchColumn: string | null;
+}
+
+export interface DailyReportConfig {
+  title: string;
+  /** "HH:mm", 24h. */
+  backupTime: string;
+  driveFolderId: string;
+  sources: FeedingSourceMapping[];
+  metrics: DailyMetric[];
+  updatedAt: string | null;
+}
+
+/* ---------------- Theme & integrations ---------------- */
+
+export type ThemePresetId = "emerald" | "forest" | "teal" | "custom";
+export type ThemeFontId = "jakarta" | "inter" | "dmsans";
+
+export interface ThemeSettings {
+  preset: ThemePresetId;
+  /** Used when preset is "custom". #RRGGBB */
+  customPrimary: string;
+  font: ThemeFontId;
+  /** Data URLs (browser storage) until file storage is connected. */
+  logoUrl: string | null;
+  faviconUrl: string | null;
+  bannerUrl: string | null;
+}
+
+export interface IntegrationSettings {
+  sheetsUrl: string;
+  sheetsConnected: boolean;
+  lastSyncAt: string | null;
+}
+
+export type BackupStatus = "success" | "failed";
+
+export interface BackupLog {
+  id: string;
+  at: string;
+  kind: "scheduled" | "manual";
+  target: "storage" | "drive" | "sheets";
+  status: BackupStatus;
+  sizeBytes: number;
+  note?: string;
+}
+
 export interface Database {
   version: 1;
   users: User[];
   forms: Form[];
   responses: FormResponse[];
+  dailyReport: DailyReportConfig;
+  theme: ThemeSettings;
+  integrations: IntegrationSettings;
+  backups: BackupLog[];
 }
 
 export const QUESTION_TYPE_LABEL: Record<QuestionType, string> = {

@@ -128,16 +128,17 @@ function ResponsesPage() {
     );
   }
 
+  const currentForm = form;
   const ratingQ = form.questions.find((q) => q.type === "rating");
   const ratingSummary = ratingQ ? summarizeQuestion(ratingQ, responses) : null;
 
   function exportCsv() {
-    const csv = responsesToCsv(form, responses, db.users);
+    const csv = responsesToCsv(currentForm, responses, db.users);
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${form.code}-jawaban-${format(new Date(), "yyyyMMdd")}.csv`;
+    a.download = `${currentForm.code}-jawaban-${format(new Date(), "yyyyMMdd")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(`${responses.length} jawaban diekspor 📥`);
@@ -153,12 +154,12 @@ function ResponsesPage() {
       const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
       const pageWidth = doc.internal.pageSize.getWidth();
       doc.setFontSize(14);
-      const titleLines = doc.splitTextToSize(form.title, pageWidth - 60);
+      const titleLines = doc.splitTextToSize(currentForm.title, pageWidth - 60);
       doc.text(titleLines, 30, 30);
       doc.setFontSize(9);
       const subtitleY = 30 + titleLines.length * 17;
       doc.text(
-        `Kode: ${form.code} - ${responses.length} jawaban - diekspor ${format(new Date(), "d MMMM yyyy HH:mm", { locale: localeId })}`,
+        `Kode: ${currentForm.code} - ${responses.length} jawaban - diekspor ${format(new Date(), "d MMMM yyyy HH:mm", { locale: localeId })}`,
         30,
         subtitleY,
       );
@@ -170,7 +171,7 @@ function ResponsesPage() {
         styles: { fontSize: 7, cellPadding: 3, overflow: "linebreak" },
         headStyles: { fillColor: [14, 159, 110] },
       });
-      doc.save(`${form.code}-jawaban-${format(new Date(), "yyyyMMdd")}.pdf`);
+      doc.save(`${currentForm.code}-jawaban-${format(new Date(), "yyyyMMdd")}.pdf`);
       toast.success(`${responses.length} jawaban diekspor 📥`);
     } catch (error) {
       console.error("Gagal mengekspor jawaban ke PDF.", error);

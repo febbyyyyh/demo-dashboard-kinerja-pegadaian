@@ -1,15 +1,75 @@
 {
   "source": "code-archive (pixel-perfect-replica.zip, FormKanwil)",
   "capabilities": [
-    {"capability": "code", "source": "TanStack Start app (src/, public/)", "outcome": "migrate", "status": "done", "next_action": "Admin UI upgraded per ROLE_CONTEXT brief"},
-    {"capability": "schema", "source": "localStorage Database (users, forms, responses)", "outcome": "migrate", "status": "pending", "next_action": "Repository adapter ready; create Cloud tables when user approves enabling Lovable Cloud"},
-    {"capability": "records", "source": "browser localStorage only (no server records)", "outcome": "migrate", "status": "pending", "next_action": "Records live in each admin's browser; offer JSON backup download/import once Cloud exists"},
-    {"capability": "auth identities", "source": "single hardcoded admin/admin123", "outcome": "replace", "status": "pending", "next_action": "Hardcoded password removed; Google sign-in UI ready, real Google auth needs Lovable Cloud"},
-    {"capability": "authorization", "source": "client-side role check (admin vs user)", "outcome": "migrate", "status": "done", "next_action": "Move to server roles table with Cloud"},
-    {"capability": "uploaded file bytes", "source": "none (UPC import parsed in browser)", "outcome": "keep", "status": "done", "next_action": "none"},
-    {"capability": "external providers", "source": "none (Google Sheets/Drive are new, UI only)", "outcome": "new", "status": "pending", "next_action": "Connect Google Sheets/Drive after Cloud is enabled"},
-    {"capability": "public endpoints/webhooks/schedules", "source": "none", "outcome": "n/a", "status": "done", "next_action": "Scheduled backup is a UI mock until Cloud"},
-    {"capability": "secrets", "source": "none", "outcome": "n/a", "status": "done", "next_action": "none"},
-    {"capability": "verification", "source": "vitest suite (16 tests)", "outcome": "migrate", "status": "pending", "next_action": "Run tests and browser check after redesign"}
+    {
+      "capability": "code",
+      "source": "TanStack Start app (src/, public/)",
+      "outcome": "migrate",
+      "status": "done",
+      "next_action": "Admin UI upgraded per ROLE_CONTEXT brief"
+    },
+    {
+      "capability": "schema",
+      "source": "localStorage Database (users, forms, responses)",
+      "outcome": "migrate",
+      "status": "pending",
+      "next_action": "Repository adapter ready; create Cloud tables when user approves enabling Lovable Cloud"
+    },
+    {
+      "capability": "records",
+      "source": "browser localStorage only (no server records)",
+      "outcome": "migrate",
+      "status": "pending",
+      "next_action": "Records live in each admin's browser; offer JSON backup download/import once Cloud exists"
+    },
+    {
+      "capability": "auth identities",
+      "source": "single hardcoded admin/admin123",
+      "outcome": "replace",
+      "status": "pending",
+      "next_action": "Hardcoded password removed (stripped from stored data too); Google sign-in UI works in demo mode; real Google OAuth waits on Lovable Cloud"
+    },
+    {
+      "capability": "authorization",
+      "source": "client-side role check (admin vs user)",
+      "outcome": "migrate",
+      "status": "done",
+      "next_action": "Move to server roles table with Cloud"
+    },
+    {
+      "capability": "uploaded file bytes",
+      "source": "none (UPC import parsed in browser)",
+      "outcome": "keep",
+      "status": "done",
+      "next_action": "none"
+    },
+    {
+      "capability": "external providers",
+      "source": "none (Google Sheets/Drive are new, UI only)",
+      "outcome": "new",
+      "status": "pending",
+      "next_action": "Connect Google Sheets/Drive after Cloud is enabled"
+    },
+    {
+      "capability": "public endpoints/webhooks/schedules",
+      "source": "none",
+      "outcome": "n/a",
+      "status": "done",
+      "next_action": "Scheduled backup is a UI mock until Cloud"
+    },
+    {
+      "capability": "secrets",
+      "source": "none",
+      "outcome": "n/a",
+      "status": "done",
+      "next_action": "none"
+    },
+    {
+      "capability": "verification",
+      "source": "vitest suite (16 tests)",
+      "outcome": "migrate",
+      "status": "done",
+      "next_action": "30 tests pass; browser-checked login, dashboard, 4 report views, JPEG/PDF export, config save + leave warning, theme, backup, respondent submit"
+    }
   ]
 }

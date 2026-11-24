@@ -10,6 +10,7 @@ import {
   type User,
 } from "./types";
 
+
 export const RATING_MAX = 5;
 
 export function uid(prefix = "id"): string {
@@ -24,21 +25,18 @@ export function normalizeUsername(username: string): string {
   return username.trim().toLowerCase();
 }
 
-/* ---------------- Auth ---------------- */
+/** Signature of the parts of a form that change its answer/export columns. */
+function questionSchemaSignature(form: Pick<Form, "questions">): string {
+  return JSON.stringify(
+    form.questions.map((q) => [q.id, q.type, q.label, q.options ?? [], q.optionMetadataColumns ?? []]),
+  );
+}
 
-export type AuthResult = { ok: true; user: User } | { ok: false; error: string };
-
-export function authenticate(db: Database, username: string, password: string): AuthResult {
-  const uname = normalizeUsername(username);
-  if (!uname || !password) return { ok: false, error: "Username dan password wajib diisi ya." };
-  const user = db.users.find((u) => u.role === "admin");
-  if (!user || user.username !== uname || user.password !== password) {
-    return { ok: false, error: "Username atau password salah. Coba cek lagi, ya!" };
-  }
-  if (!user.active) {
-    return { ok: false, error: "Akun kamu sedang dinonaktifkan. Hubungi admin Kanwil." };
-  }
-  return { ok: true, user };
+/** Schema version for a saved form: bumps only when the question structure changed. */
+export function nextSchemaVersion(previous: Form | undefined, next: Form): number {
+  const current = previous?.schemaVersion ?? 1;
+  if (!previous) return next.schemaVersion ?? 1;
+  return questionSchemaSignature(previous) === questionSchemaSignature(next) ? current : current + 1;
 }
 
 /* ---------------- Forms ---------------- */
@@ -121,10 +119,10 @@ export function validateRespondentIdentity(identity: RespondentIdentity): Record
   const name = identity.name.trim();
   const email = identity.email.trim();
 
-  if (!name) errors.respondentName = "Nama lengkap wajib diisi.";
-  if (!email) errors.respondentEmail = "Email wajib diisi.";
+  if (!name) errors["respondentName"] = "Nama lengkap wajib diisi.";
+  if (!email) errors["respondentEmail"] = "Email wajib diisi.";
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    errors.respondentEmail = "Masukkan alamat email yang valid.";
+    errors["respondentEmail"] = "Masukkan alamat email yang valid.";
 
   return errors;
 }
@@ -216,7 +214,7 @@ export function getRespondentEmail(response: FormResponse, users: User[]): strin
   return response.respondentEmail.trim() || user?.email || "";
 }
 
-function csvCell(value: string): string {
+export function csvCell(value: string): string {
   const isNumeric = /^-?(?:\d+(?:\.\d+)?|\.\d+)$/.test(value);
   const safeValue = /^[\t\r ]*[=+\-@]/.test(value) && !isNumeric ? `'${value}` : value;
   if (/[",\n\r;]/.test(safeValue)) return `"${safeValue.replace(/"/g, '""')}"`;
@@ -308,4 +306,17 @@ export function summarizeQuestion(question: Question, responses: FormResponse[])
     return { kind: "rating", average, counts, total: nums.length };
   }
   return { kind: "text", samples: values.map(String).slice(-6).reverse(), total: values.length };
+}
+
+export function getFormStatus(form: Form): "draft" | "active" | "closed" {
+  return form.active ? "active" : form.status === "closed" ? "closed" : "draft";
+}
+
+/** Next occurrence of a daily "HH:mm" schedule after `now`. */
+export function nextScheduledRun(time: string, now = new Date()): Date {
+  const [hours = 0, minutes = 0] = time.split(":").map(Number);
+  const next = new Date(now);
+  next.setHours(hours, minutes, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  return next;
 }

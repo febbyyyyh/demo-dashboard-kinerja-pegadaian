@@ -14,11 +14,11 @@ import {
   isAnswered,
   lookupForm,
   normalizeCode,
-  submitResponse,
   validateAnswers,
   validateRespondentIdentity,
 } from "@/lib/formkanwil/logic";
-import { getDb, setDb, useDb } from "@/lib/formkanwil/store";
+import { repository } from "@/lib/formkanwil/repository";
+import { useDb } from "@/lib/formkanwil/store";
 import type { Answers } from "@/lib/formkanwil/types";
 import { cn } from "@/lib/utils";
 
@@ -95,8 +95,8 @@ function FillFormPage() {
   const requiredCount = required.length + 2;
   const doneRequired =
     required.filter((q) => isAnswered(shown[q.id])).length +
-    Number(!identityErrors.respondentName) +
-    Number(!identityErrors.respondentEmail);
+    Number(!identityErrors["respondentName"]) +
+    Number(!identityErrors["respondentEmail"]);
   const progress = Math.round((doneRequired / requiredCount) * 100);
 
   function clearError(key: string) {
@@ -111,7 +111,7 @@ function FillFormPage() {
     if (!form) return;
     setSubmitting(true);
     window.setTimeout(() => {
-      const result = submitResponse(getDb(), {
+      const result = repository.responses.submit({
         formId: form.id,
         answers,
         respondent: { name: respondentName, email: respondentEmail },
@@ -123,9 +123,9 @@ function FillFormPage() {
           toast.error("Masih ada yang belum lengkap", {
             description: "Cek identitas dan pertanyaan yang ditandai merah, ya.",
           });
-          const firstIdentityError = result.errors?.respondentName
+          const firstIdentityError = result.errors?.["respondentName"]
             ? "respondent-name"
-            : result.errors?.respondentEmail
+            : result.errors?.["respondentEmail"]
               ? "respondent-email"
               : null;
           if (firstIdentityError) {
@@ -144,7 +144,6 @@ function FillFormPage() {
         }
         return;
       }
-      setDb(result.db);
       navigate({ to: "/app/sukses/$code", params: { code: form.code }, replace: true });
     }, 500);
   }
@@ -155,7 +154,11 @@ function FillFormPage() {
         {back}
 
         <section className="card-soft overflow-hidden">
-          <div className="h-2 bg-gradient-brand" />
+          {db.theme.bannerUrl ? (
+            <img src={db.theme.bannerUrl} alt="" className="h-32 w-full object-cover sm:h-40" />
+          ) : (
+            <div className="h-2 bg-gradient-brand" />
+          )}
           <div className="p-6">
             <div className="flex flex-wrap items-center gap-2">
               <span className="chip font-mono">Kode: {form.code}</span>
@@ -203,14 +206,14 @@ function FillFormPage() {
                   required
                   autoComplete="name"
                   value={respondentName}
-                  aria-invalid={Boolean(errors.respondentName)}
+                  aria-invalid={Boolean(errors["respondentName"])}
                   onChange={(event) => {
                     setRespondentName(event.target.value);
                     clearError("respondentName");
                   }}
                   placeholder="Masukkan nama lengkap"
                 />
-                {errors.respondentName && <ErrorNote>{errors.respondentName}</ErrorNote>}
+                {errors["respondentName"] && <ErrorNote>{errors["respondentName"]}</ErrorNote>}
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="respondent-email" className="text-sm font-medium">
@@ -222,14 +225,14 @@ function FillFormPage() {
                   required
                   autoComplete="email"
                   value={respondentEmail}
-                  aria-invalid={Boolean(errors.respondentEmail)}
+                  aria-invalid={Boolean(errors["respondentEmail"])}
                   onChange={(event) => {
                     setRespondentEmail(event.target.value);
                     clearError("respondentEmail");
                   }}
                   placeholder="nama@contoh.com"
                 />
-                {errors.respondentEmail && <ErrorNote>{errors.respondentEmail}</ErrorNote>}
+                {errors["respondentEmail"] && <ErrorNote>{errors["respondentEmail"]}</ErrorNote>}
               </div>
             </div>
           </section>
@@ -311,9 +314,9 @@ function FillFormPage() {
                     email: respondentEmail,
                   });
                   setErrors((current) => ({ ...current, ...identityErrors, ...pageErrors }));
-                  const firstIdentityError = identityErrors.respondentName
+                  const firstIdentityError = identityErrors["respondentName"]
                     ? "respondent-name"
-                    : identityErrors.respondentEmail
+                    : identityErrors["respondentEmail"]
                       ? "respondent-email"
                       : null;
                   if (firstIdentityError) {

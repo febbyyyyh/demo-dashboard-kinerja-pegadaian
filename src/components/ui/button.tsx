@@ -10,24 +10,29 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "rounded-full bg-gradient-brand text-primary-foreground shadow-brand hover:brightness-110",
+          "rounded-xl bg-primary text-primary-foreground shadow-brand hover:bg-primary-deep",
         brand:
-          "rounded-full bg-gradient-brand text-primary-foreground shadow-brand hover:brightness-110",
+          "rounded-xl bg-gradient-brand text-primary-foreground shadow-brand hover:brightness-110",
         brandOutline:
-          "rounded-full border-2 border-primary bg-card text-primary hover:bg-mint-soft",
+          "rounded-xl border border-primary/40 bg-card text-primary hover:bg-mint-soft",
         destructive:
-          "rounded-full bg-destructive text-primary-foreground shadow-sm hover:brightness-105",
+          "rounded-xl bg-destructive text-primary-foreground shadow-sm hover:brightness-105",
         outline:
-          "rounded-full border border-input bg-card text-foreground shadow-sm hover:bg-mint-soft hover:text-mint-foreground",
-        secondary: "rounded-full bg-mint-soft text-mint-foreground hover:bg-mint",
-        ghost: "rounded-full text-muted-foreground hover:bg-mint-soft hover:text-mint-foreground",
+          "rounded-xl border border-border bg-card text-foreground shadow-card hover:bg-mint-soft hover:text-mint-foreground",
+        secondary: "rounded-xl bg-mint-soft text-mint-foreground hover:bg-mint",
+        ghost: "rounded-xl text-muted-foreground hover:bg-mint-soft hover:text-mint-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        /* For use on the dark emerald hero/backup cards. */
+        onHero: "rounded-xl bg-on-hero text-primary-deep hover:bg-lime",
+        onHeroGhost:
+          "rounded-xl border border-on-hero/25 text-on-hero hover:bg-on-hero/10",
       },
       size: {
         default: "h-10 px-5 py-2",
         sm: "h-8 px-3 text-xs",
         lg: "h-12 px-6 py-3 text-base",
         icon: "h-9 w-9",
+        iconSm: "h-8 w-8",
       },
     },
     defaultVariants: {

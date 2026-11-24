@@ -13,9 +13,8 @@ import { useDb } from "@/lib/formkanwil/store";
 import type { Form } from "@/lib/formkanwil/types";
 
 export const Route = createFileRoute("/app/")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    code: typeof search.code === "string" ? search.code : "",
-  }),
+  validateSearch: (search: Record<string, unknown>): { code?: string } =>
+    typeof search["code"] === "string" ? { code: search["code"] } : {},
   head: () => ({
     meta: [
       { title: "Isi Form — FormKanwil" },
@@ -33,12 +32,12 @@ function PublicFormEntryPage() {
   const db = useDb();
   const navigate = useNavigate();
   const { code: sharedCode } = Route.useSearch();
-  const [code, setCode] = useState(sharedCode);
+  const [code, setCode] = useState(sharedCode ?? "");
   const [error, setError] = useState<string | null>(null);
   const [found, setFound] = useState<Form | null>(null);
 
   useEffect(() => {
-    setCode(sharedCode);
+    setCode(sharedCode ?? "");
     setFound(null);
     setError(null);
   }, [sharedCode]);

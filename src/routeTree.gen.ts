@@ -14,13 +14,23 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as DaftarRouteImport } from './routes/daftar'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminDailyReportRouteRouteImport } from './routes/admin/daily-report/route'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AdminDailyReportIndexRouteImport } from './routes/admin/daily-report/index'
+import { Route as AdminDailyReportAreaRouteImport } from './routes/admin/daily-report/area'
+import { Route as AdminDailyReportCabangRouteImport } from './routes/admin/daily-report/cabang'
+import { Route as AdminDailyReportConfigRouteImport } from './routes/admin/daily-report/config'
+import { Route as AdminDailyReportIndikatorRouteImport } from './routes/admin/daily-report/indikator'
+import { Route as AdminDailyReportUnitRouteImport } from './routes/admin/daily-report/unit'
 import { Route as AdminFormsIndexRouteImport } from './routes/admin/forms/index'
+import { Route as AdminSettingsIntegrasiRouteImport } from './routes/admin/settings/integrasi'
+import { Route as AdminSettingsThemeRouteImport } from './routes/admin/settings/theme'
 import { Route as AppIsiCodeRouteImport } from './routes/app/isi/$code'
 import { Route as AppSuksesCodeRouteImport } from './routes/app/sukses/$code'
 import { Route as AdminFormsFormIdIndexRouteImport } from './routes/admin/forms/$formId/index'
 import { Route as AdminFormsFormIdJawabanRouteImport } from './routes/admin/forms/$formId/jawaban'
+import { Route as AdminFormsFormIdPengaturanRouteImport } from './routes/admin/forms/$formId/pengaturan'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -47,6 +57,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminDailyReportRouteRoute = AdminDailyReportRouteRouteImport.update({
+  id: '/daily-report',
+  path: '/daily-report',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -57,9 +72,50 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AdminDailyReportIndexRoute = AdminDailyReportIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminDailyReportRouteRoute,
+} as any)
+const AdminDailyReportAreaRoute = AdminDailyReportAreaRouteImport.update({
+  id: '/area',
+  path: '/area',
+  getParentRoute: () => AdminDailyReportRouteRoute,
+} as any)
+const AdminDailyReportCabangRoute = AdminDailyReportCabangRouteImport.update({
+  id: '/cabang',
+  path: '/cabang',
+  getParentRoute: () => AdminDailyReportRouteRoute,
+} as any)
+const AdminDailyReportConfigRoute = AdminDailyReportConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => AdminDailyReportRouteRoute,
+} as any)
+const AdminDailyReportIndikatorRoute =
+  AdminDailyReportIndikatorRouteImport.update({
+    id: '/indikator',
+    path: '/indikator',
+    getParentRoute: () => AdminDailyReportRouteRoute,
+  } as any)
+const AdminDailyReportUnitRoute = AdminDailyReportUnitRouteImport.update({
+  id: '/unit',
+  path: '/unit',
+  getParentRoute: () => AdminDailyReportRouteRoute,
+} as any)
 const AdminFormsIndexRoute = AdminFormsIndexRouteImport.update({
   id: '/forms/',
   path: '/forms/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSettingsIntegrasiRoute = AdminSettingsIntegrasiRouteImport.update({
+  id: '/settings/integrasi',
+  path: '/settings/integrasi',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSettingsThemeRoute = AdminSettingsThemeRouteImport.update({
+  id: '/settings/theme',
+  path: '/settings/theme',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AppIsiCodeRoute = AppIsiCodeRouteImport.update({
@@ -82,19 +138,35 @@ const AdminFormsFormIdJawabanRoute = AdminFormsFormIdJawabanRouteImport.update({
   path: '/forms/$formId/jawaban',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminFormsFormIdPengaturanRoute =
+  AdminFormsFormIdPengaturanRouteImport.update({
+    id: '/forms/$formId/pengaturan',
+    path: '/forms/$formId/pengaturan',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/app': typeof AppRouteRouteWithChildren
   '/daftar': typeof DaftarRoute
+  '/admin/daily-report': typeof AdminDailyReportRouteRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/admin/daily-report/area': typeof AdminDailyReportAreaRoute
+  '/admin/daily-report/cabang': typeof AdminDailyReportCabangRoute
+  '/admin/daily-report/config': typeof AdminDailyReportConfigRoute
+  '/admin/daily-report/indikator': typeof AdminDailyReportIndikatorRoute
+  '/admin/daily-report/unit': typeof AdminDailyReportUnitRoute
+  '/admin/settings/integrasi': typeof AdminSettingsIntegrasiRoute
+  '/admin/settings/theme': typeof AdminSettingsThemeRoute
   '/app/isi/$code': typeof AppIsiCodeRoute
   '/app/sukses/$code': typeof AppSuksesCodeRoute
+  '/admin/daily-report/': typeof AdminDailyReportIndexRoute
   '/admin/forms/': typeof AdminFormsIndexRoute
   '/admin/forms/$formId/jawaban': typeof AdminFormsFormIdJawabanRoute
+  '/admin/forms/$formId/pengaturan': typeof AdminFormsFormIdPengaturanRoute
   '/admin/forms/$formId/': typeof AdminFormsFormIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -103,10 +175,19 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/admin/daily-report/area': typeof AdminDailyReportAreaRoute
+  '/admin/daily-report/cabang': typeof AdminDailyReportCabangRoute
+  '/admin/daily-report/config': typeof AdminDailyReportConfigRoute
+  '/admin/daily-report/indikator': typeof AdminDailyReportIndikatorRoute
+  '/admin/daily-report/unit': typeof AdminDailyReportUnitRoute
+  '/admin/settings/integrasi': typeof AdminSettingsIntegrasiRoute
+  '/admin/settings/theme': typeof AdminSettingsThemeRoute
   '/app/isi/$code': typeof AppIsiCodeRoute
   '/app/sukses/$code': typeof AppSuksesCodeRoute
+  '/admin/daily-report': typeof AdminDailyReportIndexRoute
   '/admin/forms': typeof AdminFormsIndexRoute
   '/admin/forms/$formId/jawaban': typeof AdminFormsFormIdJawabanRoute
+  '/admin/forms/$formId/pengaturan': typeof AdminFormsFormIdPengaturanRoute
   '/admin/forms/$formId': typeof AdminFormsFormIdIndexRoute
 }
 export interface FileRoutesById {
@@ -115,13 +196,23 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/app': typeof AppRouteRouteWithChildren
   '/daftar': typeof DaftarRoute
+  '/admin/daily-report': typeof AdminDailyReportRouteRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/admin/daily-report/area': typeof AdminDailyReportAreaRoute
+  '/admin/daily-report/cabang': typeof AdminDailyReportCabangRoute
+  '/admin/daily-report/config': typeof AdminDailyReportConfigRoute
+  '/admin/daily-report/indikator': typeof AdminDailyReportIndikatorRoute
+  '/admin/daily-report/unit': typeof AdminDailyReportUnitRoute
+  '/admin/settings/integrasi': typeof AdminSettingsIntegrasiRoute
+  '/admin/settings/theme': typeof AdminSettingsThemeRoute
   '/app/isi/$code': typeof AppIsiCodeRoute
   '/app/sukses/$code': typeof AppSuksesCodeRoute
+  '/admin/daily-report/': typeof AdminDailyReportIndexRoute
   '/admin/forms/': typeof AdminFormsIndexRoute
   '/admin/forms/$formId/jawaban': typeof AdminFormsFormIdJawabanRoute
+  '/admin/forms/$formId/pengaturan': typeof AdminFormsFormIdPengaturanRoute
   '/admin/forms/$formId/': typeof AdminFormsFormIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -131,13 +222,23 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/daftar'
+    | '/admin/daily-report'
     | '/admin/users'
     | '/admin/'
     | '/app/'
+    | '/admin/daily-report/area'
+    | '/admin/daily-report/cabang'
+    | '/admin/daily-report/config'
+    | '/admin/daily-report/indikator'
+    | '/admin/daily-report/unit'
+    | '/admin/settings/integrasi'
+    | '/admin/settings/theme'
     | '/app/isi/$code'
     | '/app/sukses/$code'
+    | '/admin/daily-report/'
     | '/admin/forms/'
     | '/admin/forms/$formId/jawaban'
+    | '/admin/forms/$formId/pengaturan'
     | '/admin/forms/$formId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -146,10 +247,19 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin'
     | '/app'
+    | '/admin/daily-report/area'
+    | '/admin/daily-report/cabang'
+    | '/admin/daily-report/config'
+    | '/admin/daily-report/indikator'
+    | '/admin/daily-report/unit'
+    | '/admin/settings/integrasi'
+    | '/admin/settings/theme'
     | '/app/isi/$code'
     | '/app/sukses/$code'
+    | '/admin/daily-report'
     | '/admin/forms'
     | '/admin/forms/$formId/jawaban'
+    | '/admin/forms/$formId/pengaturan'
     | '/admin/forms/$formId'
   id:
     | '__root__'
@@ -157,13 +267,23 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/daftar'
+    | '/admin/daily-report'
     | '/admin/users'
     | '/admin/'
     | '/app/'
+    | '/admin/daily-report/area'
+    | '/admin/daily-report/cabang'
+    | '/admin/daily-report/config'
+    | '/admin/daily-report/indikator'
+    | '/admin/daily-report/unit'
+    | '/admin/settings/integrasi'
+    | '/admin/settings/theme'
     | '/app/isi/$code'
     | '/app/sukses/$code'
+    | '/admin/daily-report/'
     | '/admin/forms/'
     | '/admin/forms/$formId/jawaban'
+    | '/admin/forms/$formId/pengaturan'
     | '/admin/forms/$formId/'
   fileRoutesById: FileRoutesById
 }
@@ -211,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/daily-report': {
+      id: '/admin/daily-report'
+      path: '/daily-report'
+      fullPath: '/admin/daily-report'
+      preLoaderRoute: typeof AdminDailyReportRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -225,11 +352,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/admin/daily-report/': {
+      id: '/admin/daily-report/'
+      path: '/'
+      fullPath: '/admin/daily-report/'
+      preLoaderRoute: typeof AdminDailyReportIndexRouteImport
+      parentRoute: typeof AdminDailyReportRouteRoute
+    }
+    '/admin/daily-report/area': {
+      id: '/admin/daily-report/area'
+      path: '/area'
+      fullPath: '/admin/daily-report/area'
+      preLoaderRoute: typeof AdminDailyReportAreaRouteImport
+      parentRoute: typeof AdminDailyReportRouteRoute
+    }
+    '/admin/daily-report/cabang': {
+      id: '/admin/daily-report/cabang'
+      path: '/cabang'
+      fullPath: '/admin/daily-report/cabang'
+      preLoaderRoute: typeof AdminDailyReportCabangRouteImport
+      parentRoute: typeof AdminDailyReportRouteRoute
+    }
+    '/admin/daily-report/config': {
+      id: '/admin/daily-report/config'
+      path: '/config'
+      fullPath: '/admin/daily-report/config'
+      preLoaderRoute: typeof AdminDailyReportConfigRouteImport
+      parentRoute: typeof AdminDailyReportRouteRoute
+    }
+    '/admin/daily-report/indikator': {
+      id: '/admin/daily-report/indikator'
+      path: '/indikator'
+      fullPath: '/admin/daily-report/indikator'
+      preLoaderRoute: typeof AdminDailyReportIndikatorRouteImport
+      parentRoute: typeof AdminDailyReportRouteRoute
+    }
+    '/admin/daily-report/unit': {
+      id: '/admin/daily-report/unit'
+      path: '/unit'
+      fullPath: '/admin/daily-report/unit'
+      preLoaderRoute: typeof AdminDailyReportUnitRouteImport
+      parentRoute: typeof AdminDailyReportRouteRoute
+    }
     '/admin/forms/': {
       id: '/admin/forms/'
       path: '/forms'
       fullPath: '/admin/forms/'
       preLoaderRoute: typeof AdminFormsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/settings/integrasi': {
+      id: '/admin/settings/integrasi'
+      path: '/settings/integrasi'
+      fullPath: '/admin/settings/integrasi'
+      preLoaderRoute: typeof AdminSettingsIntegrasiRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/settings/theme': {
+      id: '/admin/settings/theme'
+      path: '/settings/theme'
+      fullPath: '/admin/settings/theme'
+      preLoaderRoute: typeof AdminSettingsThemeRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/app/isi/$code': {
@@ -260,22 +443,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFormsFormIdJawabanRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/forms/$formId/pengaturan': {
+      id: '/admin/forms/$formId/pengaturan'
+      path: '/forms/$formId/pengaturan'
+      fullPath: '/admin/forms/$formId/pengaturan'
+      preLoaderRoute: typeof AdminFormsFormIdPengaturanRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
+interface AdminDailyReportRouteRouteChildren {
+  AdminDailyReportAreaRoute: typeof AdminDailyReportAreaRoute
+  AdminDailyReportCabangRoute: typeof AdminDailyReportCabangRoute
+  AdminDailyReportConfigRoute: typeof AdminDailyReportConfigRoute
+  AdminDailyReportIndikatorRoute: typeof AdminDailyReportIndikatorRoute
+  AdminDailyReportUnitRoute: typeof AdminDailyReportUnitRoute
+  AdminDailyReportIndexRoute: typeof AdminDailyReportIndexRoute
+}
+
+const AdminDailyReportRouteRouteChildren: AdminDailyReportRouteRouteChildren = {
+  AdminDailyReportAreaRoute: AdminDailyReportAreaRoute,
+  AdminDailyReportCabangRoute: AdminDailyReportCabangRoute,
+  AdminDailyReportConfigRoute: AdminDailyReportConfigRoute,
+  AdminDailyReportIndikatorRoute: AdminDailyReportIndikatorRoute,
+  AdminDailyReportUnitRoute: AdminDailyReportUnitRoute,
+  AdminDailyReportIndexRoute: AdminDailyReportIndexRoute,
+}
+
+const AdminDailyReportRouteRouteWithChildren =
+  AdminDailyReportRouteRoute._addFileChildren(
+    AdminDailyReportRouteRouteChildren,
+  )
+
 interface AdminRouteRouteChildren {
+  AdminDailyReportRouteRoute: typeof AdminDailyReportRouteRouteWithChildren
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminSettingsIntegrasiRoute: typeof AdminSettingsIntegrasiRoute
+  AdminSettingsThemeRoute: typeof AdminSettingsThemeRoute
   AdminFormsIndexRoute: typeof AdminFormsIndexRoute
   AdminFormsFormIdJawabanRoute: typeof AdminFormsFormIdJawabanRoute
+  AdminFormsFormIdPengaturanRoute: typeof AdminFormsFormIdPengaturanRoute
   AdminFormsFormIdIndexRoute: typeof AdminFormsFormIdIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminDailyReportRouteRoute: AdminDailyReportRouteRouteWithChildren,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminSettingsIntegrasiRoute: AdminSettingsIntegrasiRoute,
+  AdminSettingsThemeRoute: AdminSettingsThemeRoute,
   AdminFormsIndexRoute: AdminFormsIndexRoute,
   AdminFormsFormIdJawabanRoute: AdminFormsFormIdJawabanRoute,
+  AdminFormsFormIdPengaturanRoute: AdminFormsFormIdPengaturanRoute,
   AdminFormsFormIdIndexRoute: AdminFormsFormIdIndexRoute,
 }
 

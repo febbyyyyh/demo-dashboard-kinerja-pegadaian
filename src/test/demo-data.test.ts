@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  authenticate,
   createFormShareLink,
   getFormPages,
   getPageQuestions,
@@ -26,32 +25,42 @@ describe("FormKanwil initial data", () => {
     expect(database.forms).toHaveLength(0);
     expect(database.responses).toHaveLength(0);
     expect(database).not.toHaveProperty("units");
-    expect(authenticate(database, "admin", "admin123")).toMatchObject({
-      ok: true,
-      user: { role: "admin" },
-    });
   });
 
-  it("allows only the first administrator to log in", () => {
-    const database = createInitialDatabase();
-    const admin = database.users[0];
-    if (!admin) throw new Error("Expected an initial admin account");
-    const user = {
-      ...admin,
-      id: "usr_user",
-      username: "pengguna",
-      role: "user" as const,
-    };
-    const extraAdmin = {
-      ...admin,
-      id: "usr_extra_admin",
-      username: "admin-lain",
-    };
-    const withAccounts = { ...database, users: [...database.users, user, extraAdmin] };
+  it("stores no admin password; the admin signs in with Google", () => {
+    const [admin] = createInitialDatabase().users;
+    expect(admin).toBeDefined();
+    expect(admin).not.toHaveProperty("password");
+    expect(admin?.provider).toBe("google");
+  });
 
-    expect(authenticate(withAccounts, "admin", admin.password)).toMatchObject({ ok: true });
-    expect(authenticate(withAccounts, "pengguna", admin.password)).toMatchObject({ ok: false });
-    expect(authenticate(withAccounts, "admin-lain", admin.password)).toMatchObject({ ok: false });
+  it("signs in only as the single administrator in demo Google mode", async () => {
+    vi.resetModules();
+    const { auth: freshAuth } = await import("@/lib/formkanwil/auth");
+    const { getSessionUserId } = await import("@/lib/formkanwil/store");
+    const result = await freshAuth.signInWithGoogle();
+    expect(result).toMatchObject({ ok: true, demo: true, user: { role: "admin" } });
+    expect(getSessionUserId()).toBe("usr_admin");
+    await freshAuth.signOut();
+    expect(getSessionUserId()).toBeNull();
+    sessionStorage.clear();
+    localStorage.clear();
+  });
+
+  it("drops a legacy stored password when loading old browser data", async () => {
+    const legacy = createInitialDatabase();
+    localStorage.setItem(
+      "formkanwil:db:v6",
+      JSON.stringify({ ...legacy, users: legacy.users.map((u) => ({ ...u, password: "admin123" })) }),
+    );
+    vi.resetModules();
+    try {
+      const { getDb } = await import("@/lib/formkanwil/store");
+      expect(getDb().users[0]).not.toHaveProperty("password");
+      expect(localStorage.getItem("formkanwil:db:v6")).not.toContain("admin123");
+    } finally {
+      localStorage.clear();
+    }
   });
 
   it("exports response columns without a unit field", () => {
@@ -245,7 +254,7 @@ describe("FormKanwil initial data", () => {
       createdAt: new Date(0).toISOString(),
       updatedAt: new Date(0).toISOString(),
     };
-    const database: Database = { users: [], forms: [form], responses: [] };
+    const database: Database = { ...createInitialDatabase(), users: [], forms: [form], responses: [] };
     const missingIdentity = submitResponse(database, {
       formId: form.id,
       answers: {},

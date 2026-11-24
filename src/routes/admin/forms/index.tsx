@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, Copy, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { BarChart3, Copy, Pencil, Plus, Search, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/fk/States";
@@ -16,11 +16,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { generateCode, uid } from "@/lib/formkanwil/logic";
-import { setDb, useDb } from "@/lib/formkanwil/store";
+import { getFormStatus } from "@/lib/formkanwil/logic";
+import { repository } from "@/lib/formkanwil/repository";
+import { useDb } from "@/lib/formkanwil/store";
 import type { Form } from "@/lib/formkanwil/types";
 import { cn } from "@/lib/utils";
 
@@ -48,10 +50,6 @@ const FILTERS = [
   { key: "closed", label: "Ditutup" },
 ] as const;
 
-function getFormStatus(form: Form): "draft" | "active" | "closed" {
-  return form.active ? "active" : form.status === "closed" ? "closed" : "draft";
-}
-
 function FormsPage() {
   const db = useDb();
   const navigate = useNavigate();
@@ -67,48 +65,17 @@ function FormsPage() {
   }, [db.forms, query, filter]);
 
   function createForm() {
-    const now = new Date().toISOString();
-    const firstPageId = uid("page");
-    const form: Form = {
-      id: uid("frm"),
-      code: generateCode(db),
-      title: "",
-      description: "",
-      emoji: "📝",
-      active: false,
-      status: "draft",
-      pages: [{ id: firstPageId, title: "Halaman 1" }],
-      createdAt: now,
-      updatedAt: now,
-      questions: [],
-    };
-    setDb((d) => ({ ...d, forms: [...d.forms, form] }));
+    const form = repository.forms.create();
     navigate({ to: "/admin/forms/$formId", params: { formId: form.id } });
   }
 
   function toggleActive(form: Form, active: boolean) {
-    setDb((d) => ({
-      ...d,
-      forms: d.forms.map((f) =>
-        f.id === form.id
-          ? {
-              ...f,
-              active,
-              status: active ? "active" : "closed",
-              updatedAt: new Date().toISOString(),
-            }
-          : f,
-      ),
-    }));
+    repository.forms.setActive(form.id, active);
     toast.success(active ? `"${form.title}" sekarang aktif 🟢` : `"${form.title}" dinonaktifkan`);
   }
 
   function deleteForm(form: Form) {
-    setDb((d) => ({
-      ...d,
-      forms: d.forms.filter((f) => f.id !== form.id),
-      responses: d.responses.filter((r) => r.formId !== form.id),
-    }));
+    repository.forms.remove(form.id);
     toast.success("Form dihapus");
   }
 
@@ -180,7 +147,10 @@ function FormsPage() {
                     {form.emoji}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-display text-lg font-bold leading-snug">{form.title}</h3>
+                    <h3 className="flex flex-wrap items-center gap-2 font-display text-lg font-bold leading-snug">
+                      {form.title || "Form tanpa judul"}
+                      {form.feedingSlot && <Badge variant="feed">Feed {form.feedingSlot}</Badge>}
+                    </h3>
                     <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                       {form.description || "Belum ada deskripsi."}
                     </p>
@@ -221,6 +191,11 @@ function FormsPage() {
                   <Button asChild variant="secondary" size="sm">
                     <Link to="/admin/forms/$formId/jawaban" params={{ formId: form.id }}>
                       <BarChart3 /> Jawaban & statistik
+                    </Link>
+                  </Button>
+                  <Button asChild variant="ghost" size="sm">
+                    <Link to="/admin/forms/$formId/pengaturan" params={{ formId: form.id }}>
+                      <Settings2 /> Pengaturan
                     </Link>
                   </Button>
                   <AlertDialog>

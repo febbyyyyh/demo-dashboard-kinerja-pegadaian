@@ -1,11 +1,16 @@
 import { useSyncExternalStore } from "react";
 
-import { createInitialDatabase } from "./seed";
+import {
+  createDefaultDailyReportConfig,
+  createDefaultIntegrations,
+  createDefaultTheme,
+  createInitialDatabase,
+} from "./seed";
 import type { Database, User } from "./types";
 
 /*
- * Browser-only store. All data lives in localStorage so the app runs with no backend.
- * Swap these functions for real API calls when a backend is connected.
+ * Browser-only persistence used by the local repository adapter (see repository.ts).
+ * Pages must not write here directly; go through `repository` so a Cloud adapter can replace it.
  */
 const DB_KEY = "formkanwil:db:v6";
 const LEGACY_DB_KEYS = ["formkanwil:db:v2", "formkanwil:db:v3"];
@@ -18,7 +23,7 @@ let dbCache: Database | null = null;
 let sessionCache: string | null | undefined;
 const listeners = new Set<() => void>();
 
-type PreviousDatabase = Omit<Database, "users"> & {
+type PreviousDatabase = Omit<Database, "users" | "dailyReport" | "theme" | "integrations" | "backups"> & {
   users: Array<User & { unit?: string }>;
   units?: string[];
 };
@@ -49,6 +54,34 @@ function addRespondentIdentity(database: Database): Database {
   };
 }
 
+/** Fills settings added after v6 and strips the legacy stored password. */
+function withDefaults(database: Partial<Database> & Pick<Database, "users" | "forms" | "responses">): Database {
+  const dailyDefaults = createDefaultDailyReportConfig();
+  const daily = database.dailyReport ?? dailyDefaults;
+  return {
+    version: 1,
+    users: database.users.map((user) => {
+      if (user.password === undefined) return user;
+      const clean = { ...user };
+      delete clean.password;
+      return clean;
+    }),
+    forms: database.forms,
+    responses: database.responses,
+    dailyReport: {
+      ...dailyDefaults,
+      ...daily,
+      sources: dailyDefaults.sources.map(
+        (fallback) => daily.sources?.find((source) => source.slot === fallback.slot) ?? fallback,
+      ),
+      metrics: daily.metrics ?? [],
+    },
+    theme: { ...createDefaultTheme(), ...database.theme },
+    integrations: { ...createDefaultIntegrations(), ...database.integrations },
+    backups: database.backups ?? [],
+  };
+}
+
 const isBrowser = () => typeof window !== "undefined" && typeof localStorage !== "undefined";
 
 function emit() {
@@ -76,7 +109,7 @@ export function getDb(): Database {
     const raw = localStorage.getItem(DB_KEY);
     let database: Database;
     if (raw) {
-      database = JSON.parse(raw) as Database;
+      database = withDefaults(JSON.parse(raw) as Database);
     } else {
       const previous = PREVIOUS_DB_KEYS.map((key) => ({
         key,
@@ -84,7 +117,7 @@ export function getDb(): Database {
       })).find((entry) => entry.raw);
       if (previous?.raw) {
         const oldDatabase = JSON.parse(previous.raw) as PreviousDatabase;
-        database = {
+        database = withDefaults({
           version: oldDatabase.version,
           users: oldDatabase.users.map((previousUser) => {
             const user = { ...previousUser };
@@ -93,7 +126,7 @@ export function getDb(): Database {
           }),
           forms: oldDatabase.forms,
           responses: oldDatabase.responses,
-        };
+        });
         localStorage.removeItem(previous.key);
       } else {
         database = createInitialDatabase();
@@ -111,7 +144,7 @@ export function getDb(): Database {
 
 export function setDb(next: Database | ((db: Database) => Database)) {
   const value = keepSingleAdmin(
-    addRespondentIdentity(typeof next === "function" ? next(getDb()) : next),
+    addRespondentIdentity(withDefaults(typeof next === "function" ? next(getDb()) : next)),
   );
   dbCache = value;
   if (isBrowser()) localStorage.setItem(DB_KEY, JSON.stringify(value));

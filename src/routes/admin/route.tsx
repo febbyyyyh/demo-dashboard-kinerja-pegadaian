@@ -1,8 +1,9 @@
-import { createFileRoute, Link, Outlet, redirect, useLocation } from "@tanstack/react-router";
-import { FileText, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { createFileRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
 
-import { AppHeader } from "@/components/fk/AppHeader";
+import { AdminTopbar } from "@/components/fk/AdminTopbar";
+import { AppSidebar } from "@/components/fk/AppSidebar";
 import { FullPageSpinner } from "@/components/fk/States";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getCurrentUser, useCurrentUser } from "@/lib/formkanwil/store";
 
 export const Route = createFileRoute("/admin")({
@@ -17,34 +18,20 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
-const navClass =
-  "inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-mint-soft hover:text-mint-foreground data-[status=active]:bg-mint-soft data-[status=active]:text-mint-foreground";
-
 function AdminLayout() {
   const user = useCurrentUser();
   const { pathname } = useLocation();
   if (!user || user.role !== "admin") return <FullPageSpinner />;
 
-  const nav = (
-    <>
-      <Link to="/admin" activeOptions={{ exact: true }} className={navClass}>
-        <LayoutDashboard className="size-4" /> Dashboard
-      </Link>
-      <Link to="/admin/forms" className={navClass}>
-        <FileText className="size-4" /> Kelola Form
-      </Link>
-      <Link to="/admin/users" className={navClass}>
-        <ShieldCheck className="size-4" /> Akun Admin
-      </Link>
-    </>
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-page">
-      <AppHeader user={user} homeTo="/admin" nav={nav} />
-      <main key={pathname} className="mx-auto max-w-6xl animate-page-in px-4 py-8 sm:px-6 sm:py-10">
-        <Outlet />
-      </main>
-    </div>
+    <SidebarProvider style={{ "--sidebar-width": "17rem", "--sidebar-width-icon": "4.25rem" } as React.CSSProperties}>
+      <AppSidebar />
+      <SidebarInset className="min-w-0 bg-background">
+        <AdminTopbar />
+        <div key={pathname} className="mx-auto w-full max-w-[90rem] animate-page-in px-4 py-6 sm:px-6 lg:px-8">
+          <Outlet />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

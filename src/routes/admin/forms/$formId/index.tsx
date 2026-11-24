@@ -31,7 +31,6 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  generateCode,
   createFormShareLink,
   getFormPages,
   getPageQuestions,
@@ -39,7 +38,8 @@ import {
   uid,
   validateFormDraft,
 } from "@/lib/formkanwil/logic";
-import { getDb, setDb, useDb } from "@/lib/formkanwil/store";
+import { repository } from "@/lib/formkanwil/repository";
+import { getDb, useDb } from "@/lib/formkanwil/store";
 import {
   CHOICE_TYPES,
   QUESTION_TYPE_LABEL,
@@ -213,8 +213,7 @@ function Builder({ saved, responseCount }: { saved: Form; responseCount: number 
       toast.error(err);
       return;
     }
-    const next = { ...cleaned, updatedAt: new Date().toISOString() };
-    setDb((d) => ({ ...d, forms: d.forms.map((f) => (f.id === next.id ? next : f)) }));
+    const next = repository.forms.save(cleaned);
     setDraft(next);
     toast.success("Form tersimpan 💾", {
       description: next.active
@@ -327,7 +326,7 @@ function Builder({ saved, responseCount }: { saved: Form; responseCount: number 
                   variant="outline"
                   size="icon"
                   className="size-11 shrink-0"
-                  onClick={() => patch({ code: generateCode(getDb()) })}
+                  onClick={() => patch({ code: repository.forms.generateCode() })}
                   aria-label="Buat kode acak"
                   title="Buat kode acak"
                 >

@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { ThemeSync } from "@/components/fk/ThemeSync";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -82,19 +83,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "FormKanwil — Form internal Pegadaian Kanwil" },
+      { title: "FormKanwil — Pegadaian Kanwil Manado" },
       {
         name: "description",
         content:
-          "Platform form internal Pegadaian Kanwil. Setiap isian berarti. Setiap suara didengar.",
+          "Platform pengumpulan data dan Daily Report PT Pegadaian Kantor Wilayah Manado.",
       },
       { name: "author", content: "Pegadaian Kanwil" },
-      { name: "theme-color", content: "#0E9F6E" },
-      { property: "og:title", content: "FormKanwil — Form internal Pegadaian Kanwil" },
+      { name: "theme-color", content: "#146C43" },
+      { property: "og:title", content: "FormKanwil — Pegadaian Kanwil Manado" },
       {
         property: "og:description",
         content:
-          "Platform form internal Pegadaian Kanwil. Setiap isian berarti. Setiap suara didengar.",
+          "Platform pengumpulan data dan Daily Report PT Pegadaian Kantor Wilayah Manado.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -110,7 +111,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap",
+        crossOrigin: "anonymous",
+        href: "https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
       },
     ],
   }),
@@ -141,6 +143,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <ThemeSync />
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
   );

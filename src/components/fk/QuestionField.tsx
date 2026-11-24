@@ -82,7 +82,7 @@ export function QuestionField({
       );
     case "dropdown":
       return (
-        <Select value={(value as string) ?? ""} onValueChange={onChange} disabled={disabled}>
+        <Select value={(value as string) ?? ""} onValueChange={onChange} disabled={disabled ?? false}>
           <SelectTrigger id={inputId} className="max-w-sm" aria-invalid={invalid}>
             <SelectValue placeholder="Pilih salah satu" />
           </SelectTrigger>

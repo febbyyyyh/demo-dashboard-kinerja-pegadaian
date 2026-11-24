@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent, type ReactNode } from "react";
 import { FileUp, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,11 +30,13 @@ import {
 
 interface UpcListImportDialogProps {
   onImport: (choices: ImportedChoices) => void;
+  /** Optional custom trigger (e.g. the top bar quick action). */
+  trigger?: ReactNode;
 }
 
 const NO_CODE_COLUMN = "none";
 
-export function UpcListImportDialog({ onImport }: UpcListImportDialogProps) {
+export function UpcListImportDialog({ onImport, trigger }: UpcListImportDialogProps) {
   const [open, setOpen] = useState(false);
   const [table, setTable] = useState<ImportedTable | null>(null);
   const [codeIndex, setCodeIndex] = useState<string>(NO_CODE_COLUMN);
@@ -105,9 +107,11 @@ export function UpcListImportDialog({ onImport }: UpcListImportDialogProps) {
       }}
     >
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm">
-          <FileUp /> Impor daftar UPC
-        </Button>
+        {trigger ?? (
+          <Button type="button" variant="outline" size="sm">
+            <FileUp /> Impor daftar UPC
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
