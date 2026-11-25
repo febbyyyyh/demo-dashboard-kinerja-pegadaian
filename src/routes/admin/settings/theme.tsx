@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, RotateCcw } from "lucide-react";
+import { Check, Monitor, Moon, RotateCcw, Sun } from "lucide-react";
 import { toast } from "sonner";
 
 import { AssetDropzone } from "@/components/fk/AssetDropzone";
@@ -63,6 +63,40 @@ function ThemePage() {
 
       <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
         <div className="space-y-5">
+          <section className="panel p-5 sm:p-6">
+            <h2 className="font-display text-lg font-extrabold tracking-tight">Mode tampilan</h2>
+            <p className="text-sm text-muted-foreground">Pilih tema terang, gelap, atau mengikuti pengaturan sistem perangkat.</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {([
+                { id: "light", name: "Terang", desc: "Latar terang bersih", icon: Sun },
+                { id: "dark", name: "Gelap", desc: "Nyaman di ruang redup", icon: Moon },
+                { id: "system", name: "Ikuti Sistem", desc: "Otomatis sesuai OS", icon: Monitor },
+              ] as const).map(({ id, name, desc, icon: Icon }) => {
+                const selected = (theme.mode ?? "light") === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => update({ mode: id })}
+                    className={cn(
+                      "flex items-start gap-3 rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-lift",
+                      selected ? "border-primary bg-mint-soft ring-2 ring-primary/20" : "border-border bg-card",
+                    )}
+                  >
+                    <span className={cn("grid size-9 shrink-0 place-items-center rounded-xl", selected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+                      <Icon className="size-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold">{name}</span>
+                      <span className="block text-xs text-muted-foreground">{desc}</span>
+                    </span>
+                    {selected && <Check className="size-4 shrink-0 text-primary" />}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           <section className="panel p-5 sm:p-6">
             <h2 className="font-display text-lg font-extrabold tracking-tight">Palet warna</h2>
             <p className="text-sm text-muted-foreground">Mengubah --primary, --sidebar-accent, gradien kartu, dan grafik.</p>

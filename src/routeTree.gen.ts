@@ -24,6 +24,8 @@ import { Route as AdminDailyReportConfigRouteImport } from './routes/admin/daily
 import { Route as AdminDailyReportIndikatorRouteImport } from './routes/admin/daily-report/indikator'
 import { Route as AdminDailyReportUnitRouteImport } from './routes/admin/daily-report/unit'
 import { Route as AdminFormsIndexRouteImport } from './routes/admin/forms/index'
+import { Route as AdminKinerjaIndexRouteImport } from './routes/admin/kinerja/index'
+import { Route as AdminKinerjaSlugRouteImport } from './routes/admin/kinerja/$slug'
 import { Route as AdminSettingsIntegrasiRouteImport } from './routes/admin/settings/integrasi'
 import { Route as AdminSettingsThemeRouteImport } from './routes/admin/settings/theme'
 import { Route as AppIsiCodeRouteImport } from './routes/app/isi/$code'
@@ -108,6 +110,16 @@ const AdminFormsIndexRoute = AdminFormsIndexRouteImport.update({
   path: '/forms/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminKinerjaIndexRoute = AdminKinerjaIndexRouteImport.update({
+  id: '/kinerja/',
+  path: '/kinerja/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminKinerjaSlugRoute = AdminKinerjaSlugRouteImport.update({
+  id: '/kinerja/$slug',
+  path: '/kinerja/$slug',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminSettingsIntegrasiRoute = AdminSettingsIntegrasiRouteImport.update({
   id: '/settings/integrasi',
   path: '/settings/integrasi',
@@ -159,12 +171,14 @@ export interface FileRoutesByFullPath {
   '/admin/daily-report/config': typeof AdminDailyReportConfigRoute
   '/admin/daily-report/indikator': typeof AdminDailyReportIndikatorRoute
   '/admin/daily-report/unit': typeof AdminDailyReportUnitRoute
+  '/admin/kinerja/$slug': typeof AdminKinerjaSlugRoute
   '/admin/settings/integrasi': typeof AdminSettingsIntegrasiRoute
   '/admin/settings/theme': typeof AdminSettingsThemeRoute
   '/app/isi/$code': typeof AppIsiCodeRoute
   '/app/sukses/$code': typeof AppSuksesCodeRoute
   '/admin/daily-report/': typeof AdminDailyReportIndexRoute
   '/admin/forms/': typeof AdminFormsIndexRoute
+  '/admin/kinerja/': typeof AdminKinerjaIndexRoute
   '/admin/forms/$formId/jawaban': typeof AdminFormsFormIdJawabanRoute
   '/admin/forms/$formId/pengaturan': typeof AdminFormsFormIdPengaturanRoute
   '/admin/forms/$formId/': typeof AdminFormsFormIdIndexRoute
@@ -180,12 +194,14 @@ export interface FileRoutesByTo {
   '/admin/daily-report/config': typeof AdminDailyReportConfigRoute
   '/admin/daily-report/indikator': typeof AdminDailyReportIndikatorRoute
   '/admin/daily-report/unit': typeof AdminDailyReportUnitRoute
+  '/admin/kinerja/$slug': typeof AdminKinerjaSlugRoute
   '/admin/settings/integrasi': typeof AdminSettingsIntegrasiRoute
   '/admin/settings/theme': typeof AdminSettingsThemeRoute
   '/app/isi/$code': typeof AppIsiCodeRoute
   '/app/sukses/$code': typeof AppSuksesCodeRoute
   '/admin/daily-report': typeof AdminDailyReportIndexRoute
   '/admin/forms': typeof AdminFormsIndexRoute
+  '/admin/kinerja': typeof AdminKinerjaIndexRoute
   '/admin/forms/$formId/jawaban': typeof AdminFormsFormIdJawabanRoute
   '/admin/forms/$formId/pengaturan': typeof AdminFormsFormIdPengaturanRoute
   '/admin/forms/$formId': typeof AdminFormsFormIdIndexRoute
@@ -205,12 +221,14 @@ export interface FileRoutesById {
   '/admin/daily-report/config': typeof AdminDailyReportConfigRoute
   '/admin/daily-report/indikator': typeof AdminDailyReportIndikatorRoute
   '/admin/daily-report/unit': typeof AdminDailyReportUnitRoute
+  '/admin/kinerja/$slug': typeof AdminKinerjaSlugRoute
   '/admin/settings/integrasi': typeof AdminSettingsIntegrasiRoute
   '/admin/settings/theme': typeof AdminSettingsThemeRoute
   '/app/isi/$code': typeof AppIsiCodeRoute
   '/app/sukses/$code': typeof AppSuksesCodeRoute
   '/admin/daily-report/': typeof AdminDailyReportIndexRoute
   '/admin/forms/': typeof AdminFormsIndexRoute
+  '/admin/kinerja/': typeof AdminKinerjaIndexRoute
   '/admin/forms/$formId/jawaban': typeof AdminFormsFormIdJawabanRoute
   '/admin/forms/$formId/pengaturan': typeof AdminFormsFormIdPengaturanRoute
   '/admin/forms/$formId/': typeof AdminFormsFormIdIndexRoute
@@ -231,12 +249,14 @@ export interface FileRouteTypes {
     | '/admin/daily-report/config'
     | '/admin/daily-report/indikator'
     | '/admin/daily-report/unit'
+    | '/admin/kinerja/$slug'
     | '/admin/settings/integrasi'
     | '/admin/settings/theme'
     | '/app/isi/$code'
     | '/app/sukses/$code'
     | '/admin/daily-report/'
     | '/admin/forms/'
+    | '/admin/kinerja/'
     | '/admin/forms/$formId/jawaban'
     | '/admin/forms/$formId/pengaturan'
     | '/admin/forms/$formId/'
@@ -252,12 +272,14 @@ export interface FileRouteTypes {
     | '/admin/daily-report/config'
     | '/admin/daily-report/indikator'
     | '/admin/daily-report/unit'
+    | '/admin/kinerja/$slug'
     | '/admin/settings/integrasi'
     | '/admin/settings/theme'
     | '/app/isi/$code'
     | '/app/sukses/$code'
     | '/admin/daily-report'
     | '/admin/forms'
+    | '/admin/kinerja'
     | '/admin/forms/$formId/jawaban'
     | '/admin/forms/$formId/pengaturan'
     | '/admin/forms/$formId'
@@ -276,12 +298,14 @@ export interface FileRouteTypes {
     | '/admin/daily-report/config'
     | '/admin/daily-report/indikator'
     | '/admin/daily-report/unit'
+    | '/admin/kinerja/$slug'
     | '/admin/settings/integrasi'
     | '/admin/settings/theme'
     | '/app/isi/$code'
     | '/app/sukses/$code'
     | '/admin/daily-report/'
     | '/admin/forms/'
+    | '/admin/kinerja/'
     | '/admin/forms/$formId/jawaban'
     | '/admin/forms/$formId/pengaturan'
     | '/admin/forms/$formId/'
@@ -401,6 +425,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFormsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/kinerja/': {
+      id: '/admin/kinerja/'
+      path: '/kinerja'
+      fullPath: '/admin/kinerja/'
+      preLoaderRoute: typeof AdminKinerjaIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/kinerja/$slug': {
+      id: '/admin/kinerja/$slug'
+      path: '/kinerja/$slug'
+      fullPath: '/admin/kinerja/$slug'
+      preLoaderRoute: typeof AdminKinerjaSlugRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/settings/integrasi': {
       id: '/admin/settings/integrasi'
       path: '/settings/integrasi'
@@ -480,9 +518,11 @@ interface AdminRouteRouteChildren {
   AdminDailyReportRouteRoute: typeof AdminDailyReportRouteRouteWithChildren
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminKinerjaSlugRoute: typeof AdminKinerjaSlugRoute
   AdminSettingsIntegrasiRoute: typeof AdminSettingsIntegrasiRoute
   AdminSettingsThemeRoute: typeof AdminSettingsThemeRoute
   AdminFormsIndexRoute: typeof AdminFormsIndexRoute
+  AdminKinerjaIndexRoute: typeof AdminKinerjaIndexRoute
   AdminFormsFormIdJawabanRoute: typeof AdminFormsFormIdJawabanRoute
   AdminFormsFormIdPengaturanRoute: typeof AdminFormsFormIdPengaturanRoute
   AdminFormsFormIdIndexRoute: typeof AdminFormsFormIdIndexRoute
@@ -492,9 +532,11 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminDailyReportRouteRoute: AdminDailyReportRouteRouteWithChildren,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminKinerjaSlugRoute: AdminKinerjaSlugRoute,
   AdminSettingsIntegrasiRoute: AdminSettingsIntegrasiRoute,
   AdminSettingsThemeRoute: AdminSettingsThemeRoute,
   AdminFormsIndexRoute: AdminFormsIndexRoute,
+  AdminKinerjaIndexRoute: AdminKinerjaIndexRoute,
   AdminFormsFormIdJawabanRoute: AdminFormsFormIdJawabanRoute,
   AdminFormsFormIdPengaturanRoute: AdminFormsFormIdPengaturanRoute,
   AdminFormsFormIdIndexRoute: AdminFormsFormIdIndexRoute,

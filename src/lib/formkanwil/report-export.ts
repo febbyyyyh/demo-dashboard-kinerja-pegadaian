@@ -95,17 +95,38 @@ export async function exportTablePdf(table: ExportTable) {
 /** High-resolution JPEG of a rendered report frame (header, table/cards, footer). */
 export async function exportNodeJpeg(node: HTMLElement, filename: string) {
   const { toJpeg } = await import("html-to-image");
-  const background = getComputedStyle(document.body).getPropertyValue("--card").trim() || "white";
-  const dataUrl = await toJpeg(node, {
-    pixelRatio: 2,
-    quality: 0.95,
-    backgroundColor: background,
-    cacheBust: true,
-    filter: (element) =>
-      !(element instanceof HTMLElement && element.dataset["exportIgnore"] === "true"),
-  });
-  const anchor = document.createElement("a");
-  anchor.href = dataUrl;
-  anchor.download = `${filename}.jpeg`;
-  anchor.click();
+  node.dataset["exportingJpeg"] = "true";
+  try {
+    // Wait a frame so hidden toolbars & overflow:visible recalculate exact full dimensions
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    const computedBg = getComputedStyle(node).backgroundColor;
+    const background =
+      computedBg && computedBg !== "rgba(0, 0, 0, 0)" && computedBg !== "transparent"
+        ? computedBg
+        : getComputedStyle(document.documentElement).getPropertyValue("--card").trim() || "#ffffff";
+    const width = Math.ceil(Math.max(node.scrollWidth, node.offsetWidth));
+    const height = Math.ceil(Math.max(node.scrollHeight, node.offsetHeight));
+
+    const dataUrl = await toJpeg(node, {
+      pixelRatio: 2,
+      quality: 0.96,
+      backgroundColor: background,
+      cacheBust: true,
+      width,
+      height,
+      style: {
+        margin: "0",
+        width: `${width}px`,
+        height: `${height}px`,
+      },
+      filter: (element) =>
+        !(element instanceof HTMLElement && element.dataset["exportIgnore"] === "true"),
+    });
+    const anchor = document.createElement("a");
+    anchor.href = dataUrl;
+    anchor.download = `${filename}.jpeg`;
+    anchor.click();
+  } finally {
+    delete node.dataset["exportingJpeg"];
+  }
 }

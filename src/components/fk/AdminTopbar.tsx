@@ -1,14 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { formatDistanceToNow } from "date-fns";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { Bell, CloudCheck, FileUp, Lock, LogOut, Palette, Plus, Search, ShieldCheck } from "lucide-react";
+import { Home, Lock, LogOut, Moon, Palette, Search, ShieldCheck, Sun } from "lucide-react";
 import { toast } from "sonner";
 
-import { AdminOnly, useAdminAccess, ViewModeBadge } from "@/components/fk/access/AdminAccess";
+import { useAdminAccess, ViewModeBadge } from "@/components/fk/access/AdminAccess";
 import { initialsOf } from "@/components/fk/AppSidebar";
-import { UpcListImportDialog } from "@/components/fk/UpcListImportDialog";
 import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import {
   CommandDialog,
   CommandEmpty,
@@ -16,7 +23,6 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@/components/ui/command";
 import {
   DropdownMenu,
@@ -26,19 +32,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { auth } from "@/lib/formkanwil/auth";
-import { useForms, useIntegrations, useResponses } from "@/lib/formkanwil/hooks";
+import { useForms, useResponses, useThemeSettings } from "@/lib/formkanwil/hooks";
+import { getKinerjaPage } from "@/lib/formkanwil/kinerja";
 import { buildAdminNavigation, type NavTarget } from "@/lib/formkanwil/navigation";
 import { repository } from "@/lib/formkanwil/repository";
+import { resolveThemeMode } from "@/lib/formkanwil/theme";
 import type { ImportedChoices } from "@/lib/formkanwil/upc-import";
 
-function relative(iso: string) {
-  return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: localeId });
-}
-
+/** Preserved helper for form creation routes. */
 export function useQuickActions() {
   const navigate = useNavigate();
   return {
@@ -72,14 +76,57 @@ export function useQuickActions() {
   };
 }
 
+type BreadcrumbSegment = { label: string; href?: string };
+
+function useBreadcrumbs(): BreadcrumbSegment[] {
+  const { pathname } = useLocation();
+
+  return useMemo(() => {
+    const segments: BreadcrumbSegment[] = [{ label: "Home", href: "/admin" }];
+
+    if (pathname === "/admin" || pathname === "/admin/kinerja/home") return segments;
+
+    if (pathname.startsWith("/admin/kinerja")) {
+      const slug = pathname.replace(/^\/admin\/kinerja\/?/, "").split("/")[0] || "home";
+      const kinerjaPage = getKinerjaPage(slug);
+      if (kinerjaPage.groupTitle) {
+        segments.push({ label: kinerjaPage.groupTitle });
+      }
+      segments.push({ label: kinerjaPage.title });
+      return segments;
+    }
+
+    if (pathname.startsWith("/admin/settings")) {
+      segments.push({ label: "Pengaturan" });
+      if (pathname === "/admin/settings/theme") segments.push({ label: "Tema & Branding" });
+      return segments;
+    }
+
+    if (pathname === "/admin/users") {
+      segments.push({ label: "Pengaturan" });
+      segments.push({ label: "Akun & Akses" });
+      return segments;
+    }
+
+    return segments;
+  }, [pathname]);
+}
+
 export function AdminTopbar() {
   const navigate = useNavigate();
   const { user, isAdmin, openLogin } = useAdminAccess();
   const forms = useForms();
   const responses = useResponses();
-  const { settings, backups } = useIntegrations();
-  const actions = useQuickActions();
+  const theme = useThemeSettings();
+  const resolvedMode = resolveThemeMode(theme.mode ?? "light");
+  const isDark = resolvedMode === "dark";
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const breadcrumbs = useBreadcrumbs();
+
+  const toggleColorMode = () => {
+    const nextMode = isDark ? "light" : "dark";
+    repository.theme.save({ ...theme, mode: nextMode });
+  };
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -94,14 +141,6 @@ export function AdminTopbar() {
   }, []);
 
   const groups = useMemo(() => buildAdminNavigation(forms, responses, { isAdmin }), [forms, responses, isAdmin]);
-  const latestResponses = useMemo(
-    () => [...responses].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt)).slice(0, 6),
-    [responses],
-  );
-  const lastSync = [settings.lastSyncAt, backups[0]?.at]
-    .filter((value): value is string => Boolean(value))
-    .sort()
-    .at(-1);
 
   const go = (target: NavTarget) => {
     setPaletteOpen(false);
@@ -114,96 +153,75 @@ export function AdminTopbar() {
       <SidebarTrigger className="size-9 rounded-xl text-muted-foreground hover:bg-mint-soft hover:text-mint-foreground" />
       <Separator orientation="vertical" className="hidden h-6 sm:block" />
 
+      {/* Breadcrumbs */}
+      <Breadcrumb className="hidden sm:flex">
+        <BreadcrumbList>
+          {breadcrumbs.map((seg, i) => {
+            const isLast = i === breadcrumbs.length - 1;
+            return (
+              <BreadcrumbItem key={i}>
+                {!isLast ? (
+                  <>
+                    {seg.href ? (
+                      <BreadcrumbLink asChild>
+                        <Link to={seg.href as string} className="flex items-center gap-1 text-xs font-medium">
+                          {i === 0 && <Home className="size-3" />}
+                          {seg.label}
+                        </Link>
+                      </BreadcrumbLink>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                        {seg.label}
+                      </span>
+                    )}
+                    <BreadcrumbSeparator />
+                  </>
+                ) : (
+                  <BreadcrumbPage className="max-w-[200px] truncate text-xs font-semibold text-foreground">
+                    {seg.label}
+                  </BreadcrumbPage>
+                )}
+              </BreadcrumbItem>
+            );
+          })}
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* Command Search */}
       <button
         type="button"
         onClick={() => setPaletteOpen(true)}
-        className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm text-muted-foreground shadow-card transition-colors hover:border-primary/30 sm:max-w-md"
+        className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm text-muted-foreground shadow-card transition-colors hover:border-primary/30 sm:max-w-sm"
       >
         <Search className="size-4 shrink-0" />
-        <span className="truncate">Cari form, menu, atau aksi…</span>
+        <span className="truncate">Cari menu kinerja…</span>
         <kbd className="ml-auto hidden rounded-md border border-border bg-muted px-1.5 py-0.5 font-sans text-[0.6875rem] font-semibold sm:inline">
           ⌘K
         </kbd>
       </button>
 
       <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-        <ViewModeBadge className="hidden sm:inline-flex" />
-        <div
-          className="hidden items-center gap-2 rounded-xl px-2 text-xs text-muted-foreground xl:flex"
-          title="Status sinkronisasi terakhir"
+        <span className="hidden text-xs font-medium text-muted-foreground xl:inline">
+          {format(new Date(), "EEEE, d MMMM yyyy", { locale: localeId })}
+        </span>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={toggleColorMode}
+          aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
+          title={isDark ? "Mode Terang" : "Mode Gelap"}
+          className="rounded-xl text-muted-foreground hover:bg-mint-soft hover:text-mint-foreground"
         >
-          <span className="relative flex size-2">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-glow opacity-60" />
-            <span className="relative inline-flex size-2 rounded-full bg-primary" />
-          </span>
-          <CloudCheck className="size-4" />
-          {lastSync ? `Sinkron ${relative(lastSync)}` : "Belum pernah sinkron"}
-        </div>
+          {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+        </Button>
 
-        <AdminOnly>
-          <UpcListImportDialog
-            onImport={actions.createFromUpc}
-            trigger={
-              <Button variant="outline" size="sm" className="hidden h-9 md:inline-flex">
-                <FileUp /> Import UPC
-              </Button>
-            }
-          />
-          <Button size="sm" className="h-9" onClick={actions.createForm}>
-            <Plus /> <span className="hidden sm:inline">Buat Form</span>
-          </Button>
-        </AdminOnly>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative" aria-label="Notifikasi">
-              <Bell />
-              {latestResponses.length > 0 && (
-                <span className="absolute right-2 top-2 size-2 rounded-full bg-primary-glow ring-2 ring-background" />
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-80 rounded-2xl p-0">
-            <div className="border-b border-border px-4 py-3 text-sm font-bold">Jawaban terbaru</div>
-            {latestResponses.length === 0 ? (
-              <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                Belum ada jawaban masuk.
-              </p>
-            ) : (
-              <ul className="max-h-80 divide-y divide-border overflow-y-auto">
-                {latestResponses.map((response) => {
-                  const form = forms.find((item) => item.id === response.formId);
-                  return (
-                    <li key={response.id}>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          form &&
-                          navigate({ to: "/admin/forms/$formId/jawaban", params: { formId: form.id } })
-                        }
-                        className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-mint-soft"
-                      >
-                        <span className="text-lg leading-none">{form?.emoji ?? "📝"}</span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-semibold">
-                            {response.respondentName}
-                          </span>
-                          <span className="block truncate text-xs text-muted-foreground">
-                            {form?.title ?? "Form terhapus"} · {relative(response.submittedAt)}
-                          </span>
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </PopoverContent>
-        </Popover>
+        <ViewModeBadge className="hidden sm:inline-flex" />
 
         {!user && (
           <Button size="sm" className="h-9" onClick={openLogin}>
-            <Lock /> <span className="hidden sm:inline">Login Admin</span>
+            <Lock /> <span className="hidden sm:inline">Masuk</span>
           </Button>
         )}
         {user && (
@@ -221,22 +239,30 @@ export function AdminTopbar() {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex items-center justify-between gap-2">
                   <span className="truncate text-sm font-semibold">{user.name}</span>
-                  <span className="pill bg-lime text-primary-deep">Admin Mode</span>
+                  {isAdmin ? (
+                    <span className="pill bg-lime text-primary-deep">Admin Mode</span>
+                  ) : user.assignedArea ? (
+                    <span className="pill bg-gold-soft text-gold-foreground">Area {user.assignedArea}</span>
+                  ) : null}
                 </div>
                 <div className="truncate text-xs text-muted-foreground">@{user.username}</div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => navigate({ to: "/admin/users" })}>
-                <ShieldCheck /> Akun & Akses
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => navigate({ to: "/admin/settings/theme" })}>
-                <Palette /> Tema & Branding
-              </DropdownMenuItem>
+              {isAdmin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => navigate({ to: "/admin/users" })}>
+                    <ShieldCheck /> Akun &amp; Akses
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => navigate({ to: "/admin/settings/theme" })}>
+                    <Palette /> Tema &amp; Branding
+                  </DropdownMenuItem>
+                </>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onSelect={async () => {
                   await auth.signOut();
-                  toast.info("Kamu keluar dari Admin Mode", { description: "Dashboard tetap bisa dilihat." });
+                  toast.info("Kamu telah keluar", { description: "Dashboard tetap bisa dilihat dalam Mode Lihat." });
                   navigate({ to: "/admin", replace: true });
                 }}
               >
@@ -248,62 +274,38 @@ export function AdminTopbar() {
       </div>
 
       <CommandDialog open={paletteOpen} onOpenChange={setPaletteOpen}>
-        <CommandInput placeholder="Ketik nama form, kode, atau menu…" />
+        <CommandInput placeholder="Cari menu kinerja, KPI, atau pengaturan…" />
         <CommandList>
           <CommandEmpty>Tidak ada yang cocok.</CommandEmpty>
-          <CommandGroup heading="Aksi cepat">
-            {isAdmin ? (
-              <CommandItem
-                onSelect={() => {
-                  setPaletteOpen(false);
-                  actions.createForm();
-                }}
-              >
-                <Plus /> Buat form baru
-              </CommandItem>
-            ) : (
-              <CommandItem
-                onSelect={() => {
-                  setPaletteOpen(false);
-                  openLogin();
-                }}
-              >
-                <Lock /> Login Admin
-              </CommandItem>
-            )}
-          </CommandGroup>
-          <CommandSeparator />
-          {groups
-            .filter((group) => group.id !== "active-forms")
-            .map((group) => (
-              <CommandGroup key={group.id} heading={group.label}>
-                {group.items.flatMap((item) => [item, ...(item.children ?? [])]).map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <CommandItem key={item.id} value={`${group.label} ${item.label}`} onSelect={() => go(item.link)}>
-                      {Icon ? <Icon /> : null} {item.label}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            ))}
-          {forms.length > 0 && (
-            <CommandGroup heading="Form">
-              {forms.map((form) => (
-                <CommandItem
-                  key={form.id}
-                  value={`${form.title} ${form.code}`}
-                  onSelect={() =>
-                    go({ to: isAdmin ? "/admin/forms/$formId" : "/admin/forms/$formId/jawaban", params: { formId: form.id } })
-                  }
-                >
-                  <span>{form.emoji}</span>
-                  <span className="flex-1 truncate">{form.title || "Form tanpa judul"}</span>
-                  <span className="font-mono text-xs text-muted-foreground">{form.code}</span>
-                </CommandItem>
-              ))}
+          {groups.map((group) => (
+            <CommandGroup key={group.id} heading={group.label}>
+              {group.items.flatMap((item) =>
+                item.children?.length
+                  ? item.children.map((child) => (
+                      <CommandItem
+                        key={child.id}
+                        value={`${item.label} ${child.label}`}
+                        onSelect={() => go(child.link)}
+                      >
+                        {item.icon ? <item.icon className="size-4 text-primary" /> : null}
+                        <span>
+                          {item.label} / <strong>{child.label}</strong>
+                        </span>
+                      </CommandItem>
+                    ))
+                  : [
+                      <CommandItem
+                        key={item.id}
+                        value={item.label}
+                        onSelect={() => go(item.link)}
+                      >
+                        {item.icon ? <item.icon className="size-4 text-primary" /> : null}
+                        <span>{item.label}</span>
+                      </CommandItem>,
+                    ],
+              )}
             </CommandGroup>
-          )}
+          ))}
         </CommandList>
       </CommandDialog>
     </header>

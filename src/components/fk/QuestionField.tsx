@@ -60,7 +60,7 @@ export function QuestionField({
           id={inputId}
           type="number"
           inputMode="numeric"
-          className="max-w-[200px]"
+          className="w-full sm:max-w-[200px]"
           value={value === undefined ? "" : String(value)}
           onChange={(e) => onChange(e.target.value === "" ? undefined : Number(e.target.value))}
           placeholder="0"
@@ -73,7 +73,7 @@ export function QuestionField({
         <Input
           id={inputId}
           type="date"
-          className="max-w-[220px]"
+          className="w-full sm:max-w-[220px]"
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
@@ -83,7 +83,7 @@ export function QuestionField({
     case "dropdown":
       return (
         <Select value={(value as string) ?? ""} onValueChange={onChange} disabled={disabled ?? false}>
-          <SelectTrigger id={inputId} className="max-w-sm" aria-invalid={invalid}>
+          <SelectTrigger id={inputId} className="w-full sm:max-w-sm" aria-invalid={invalid}>
             <SelectValue placeholder="Pilih salah satu" />
           </SelectTrigger>
           <SelectContent>

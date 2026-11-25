@@ -180,6 +180,72 @@
   --shadow-hover: 0 14px 30px -16px color-mix(in oklab, var(--navy) 24%, transparent);
 }
 
+.dark {
+  color-scheme: dark;
+
+  /* Dark surfaces inspired by Pegadaian deep-emerald dark mode, derived from runtime brand vars */
+  --background: #0f1713;
+  --foreground: #eaf0ec;
+  --card: #16211b;
+  --card-foreground: #eaf0ec;
+  --popover: #16211b;
+  --popover-foreground: #eaf0ec;
+  --muted: #1d2b24;
+  --muted-foreground: #92a298;
+  --border: #25342b;
+  --input: #25342b;
+
+  --mint: color-mix(in oklab, var(--primary) 38%, #16211b);
+  --mint-soft: color-mix(in oklab, var(--primary) 22%, #16211b);
+  --mint-foreground: color-mix(in oklab, var(--primary-glow) 72%, white);
+  --secondary: color-mix(in oklab, var(--primary) 22%, #16211b);
+  --secondary-foreground: color-mix(in oklab, var(--primary-glow) 72%, white);
+  --accent: color-mix(in oklab, var(--primary) 22%, #16211b);
+  --accent-foreground: color-mix(in oklab, var(--primary-glow) 72%, white);
+
+  --gold: #d4ae5c;
+  --gold-soft: #2b2616;
+  --gold-foreground: #e9cf8b;
+  --warning: #d4ae5c;
+  --warning-soft: #2b2616;
+  --destructive: #e27b63;
+  --destructive-foreground: #f8b4a6;
+  --destructive-soft: #311b16;
+
+  --chart-1: color-mix(in oklab, var(--primary-glow) 55%, var(--primary));
+  --chart-2: var(--primary-glow);
+  --chart-3: #d4ae5c;
+  --chart-4: var(--lime);
+  --chart-5: #60a5fa;
+
+  --sidebar: #121c17;
+  --sidebar-foreground: #c4d3ca;
+  --sidebar-accent: color-mix(in oklab, var(--primary) 24%, #16211b);
+  --sidebar-accent-foreground: color-mix(in oklab, var(--primary-glow) 78%, white);
+  --sidebar-border: #25342b;
+
+  --gradient-hero-card: radial-gradient(
+      120% 90% at 100% 0%,
+      color-mix(in oklab, var(--primary-glow) 42%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(140deg, var(--primary-deep) 0%, color-mix(in oklab, var(--primary) 82%, var(--primary-glow)) 100%);
+  --gradient-page: linear-gradient(180deg, #0f1713 0%, #0f1713 100%);
+  --gradient-hero: radial-gradient(
+      120% 80% at 0% 0%,
+      color-mix(in oklab, var(--primary) 26%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 70% at 100% 10%,
+      color-mix(in oklab, var(--primary-glow) 12%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(180deg, #0f1713 0%, #131d18 100%);
+  --shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 35%), 0 1px 1px 0 rgb(0 0 0 / 24%);
+  --shadow-hover: 0 14px 30px -14px rgb(0 0 0 / 55%);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -308,6 +374,18 @@
 /* Blends white-background illustrations into tinted surfaces. */
 @utility illustration-blend {
   mix-blend-mode: multiply;
+}
+
+/* Clean layout during JPEG export: hide toolbars and remove scrollbars so no row is clipped. */
+[data-exporting-jpeg="true"] [data-export-ignore="true"] {
+  display: none !important;
+}
+
+[data-exporting-jpeg="true"] .overflow-auto,
+[data-exporting-jpeg="true"] .overflow-x-auto,
+[data-exporting-jpeg="true"] .overflow-y-auto {
+  overflow: visible !important;
+  max-height: none !important;
 }
 
 /* ---------- Motion ---------- */

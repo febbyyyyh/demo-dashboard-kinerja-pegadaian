@@ -1,4 +1,4 @@
-import type { ThemeFontId, ThemePresetId, ThemeSettings } from "./types";
+import type { ThemeFontId, ThemeMode, ThemePresetId, ThemeSettings } from "./types";
 
 export interface ThemePalette {
   primary: string;
@@ -54,6 +54,15 @@ export function paletteFor(theme: ThemeSettings): ThemePalette {
   };
 }
 
+export function resolveThemeMode(mode: ThemeMode = "light"): "light" | "dark" {
+  if (mode === "dark") return "dark";
+  if (mode === "light") return "light";
+  if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  return "light";
+}
+
 /** Writes the theme into the CSS variables read by src/styles.css — live, no rebuild. */
 export function applyTheme(theme: ThemeSettings, root: HTMLElement = document.documentElement) {
   const palette = paletteFor(theme);
@@ -63,6 +72,10 @@ export function applyTheme(theme: ThemeSettings, root: HTMLElement = document.do
   root.style.setProperty("--lime", palette.lime);
   const font = THEME_FONTS.find((item) => item.id === theme.font) ?? THEME_FONTS[0]!;
   root.style.setProperty("--font-ui", font.family);
+
+  const resolvedMode = resolveThemeMode(theme.mode ?? "light");
+  root.classList.toggle("dark", resolvedMode === "dark");
+  root.dataset["theme"] = resolvedMode;
 
   if (theme.faviconUrl) {
     let link = document.querySelector<HTMLLinkElement>("link[data-fk-favicon]");

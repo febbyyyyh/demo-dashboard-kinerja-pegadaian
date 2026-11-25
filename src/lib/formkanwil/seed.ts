@@ -24,6 +24,7 @@ export function createDefaultTheme(): ThemeSettings {
     preset: "emerald",
     customPrimary: "#146C43",
     font: "jakarta",
+    mode: "light",
     logoUrl: null,
     faviconUrl: null,
     bannerUrl: null,

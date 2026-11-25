@@ -4,7 +4,6 @@ import { toast } from "sonner";
 
 import { useAdminAccess } from "@/components/fk/access/AdminAccess";
 import { NavAnchor } from "@/components/fk/NavAnchor";
-import { PegadaianLogo } from "@/components/fk/Logo";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
@@ -86,6 +85,9 @@ function Flyout({ item, pathname }: { item: NavItem; pathname: string }) {
       <div className="flex items-center justify-between gap-2 px-2 pb-2 pt-1">
         <span className="truncate text-sm font-bold text-foreground">{item.label}</span>
         {item.feedingSlot ? <FeedDot slot={item.feedingSlot} /> : null}
+        {item.lockBadge ? (
+          <span className="pill bg-gold-soft text-gold-foreground">{item.lockBadge}</span>
+        ) : null}
       </div>
       <div className="flex flex-col gap-0.5">
         {item.children?.map((child) => {
@@ -173,6 +175,9 @@ function NavEntry({ item, pathname }: { item: NavItem; pathname: string }) {
             <ItemIcon item={item} />
             <span className="flex-1 truncate">{item.label}</span>
             {item.feedingSlot ? <FeedDot slot={item.feedingSlot} /> : null}
+            {item.lockBadge ? (
+              <span className="pill bg-gold-soft text-gold-foreground">{item.lockBadge}</span>
+            ) : null}
             <ChevronRight className="ml-auto !size-3.5 text-muted-foreground transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
@@ -220,35 +225,28 @@ export function AppSidebar() {
           className="flex items-center gap-3 rounded-xl p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-brand font-display text-sm font-extrabold text-primary-foreground shadow-brand">
-            FK
+            DK
           </span>
           <span className="min-w-0 group-data-[collapsible=icon]:hidden">
             <span className="block font-display text-base font-extrabold leading-tight tracking-tight text-foreground">
-              FormKanwil
+              Dashboard Kinerja
             </span>
             <span className="block truncate text-xs text-muted-foreground">Kanwil Manado</span>
           </span>
-          <PegadaianLogo className="ml-auto h-6 group-data-[collapsible=icon]:hidden" />
         </NavAnchor>
       </SidebarHeader>
 
       <SidebarContent className="gap-1 px-1">
         {groups.map((group) =>
-          group.items.length === 0 && group.id !== "active-forms" ? null : (
+          group.items.length === 0 ? null : (
             <SidebarGroup key={group.id}>
               <SidebarGroupLabel className="eyebrow px-3 text-[0.625rem]">
                 {group.label}
               </SidebarGroupLabel>
               <SidebarMenu className="gap-0.5">
-                {group.items.length === 0 ? (
-                  <li className="px-3 py-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
-                    Belum ada form aktif.
-                  </li>
-                ) : (
-                  group.items.map((item) => (
-                    <NavEntry key={item.id} item={item} pathname={pathname} />
-                  ))
-                )}
+                {group.items.map((item) => (
+                  <NavEntry key={item.id} item={item} pathname={pathname} />
+                ))}
               </SidebarMenu>
             </SidebarGroup>
           ),
@@ -261,11 +259,11 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={openLogin}
-                tooltip="Login Admin"
+                tooltip="Masuk (Admin / Area)"
                 className="h-11 rounded-xl border border-primary/30 bg-card px-3 font-semibold text-primary hover:bg-mint-soft group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!p-3"
               >
                 <Lock />
-                <span>Login Admin</span>
+                <span>Masuk (Admin / Area)</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -284,28 +282,36 @@ export function AppSidebar() {
                   <span className="block truncate text-sm font-semibold text-foreground">
                     {user.name}
                   </span>
-                  <span className="block truncate text-xs font-semibold text-primary">Admin Mode</span>
+                  <span className={cn("block truncate text-xs font-semibold", isAdmin ? "text-primary" : "text-gold-foreground")}>
+                    {isAdmin ? "Admin Mode" : user.assignedArea ? `Area ${user.assignedArea}` : "Pengguna"}
+                  </span>
                 </span>
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="right" align="end" className="w-56 rounded-xl">
               <DropdownMenuLabel className="font-normal">
                 <div className="text-sm font-semibold">{user.name}</div>
-                <div className="text-xs text-muted-foreground">Administrator · @{user.username}</div>
+                <div className="text-xs text-muted-foreground">
+                  {isAdmin ? "Administrator" : user.assignedArea ? `Grup Area ${user.assignedArea}` : "Pengguna"} · @{user.username}
+                </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => navigate({ to: "/admin/users" })}>
-                <ShieldCheck /> Akun & Akses
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => navigate({ to: "/admin/settings/theme" })}>
-                <Palette /> Tema & Branding
-              </DropdownMenuItem>
+              {isAdmin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => navigate({ to: "/admin/users" })}>
+                    <ShieldCheck /> Akun & Akses
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => navigate({ to: "/admin/settings/theme" })}>
+                    <Palette /> Tema & Branding
+                  </DropdownMenuItem>
+                </>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className={cn("text-destructive-foreground focus:bg-destructive-soft")}
                 onSelect={async () => {
                   await auth.signOut();
-                  toast.info("Kamu keluar dari Admin Mode", { description: "Dashboard tetap bisa dilihat." });
+                  toast.info("Kamu telah keluar", { description: "Dashboard tetap bisa dilihat dalam Mode Lihat." });
                   navigate({ to: "/admin", replace: true });
                 }}
               >

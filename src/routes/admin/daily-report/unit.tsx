@@ -107,7 +107,7 @@ function UnitView() {
       >
         {metric && (
           <Select value={metric.id} onValueChange={setMetricId}>
-            <SelectTrigger className="h-9 w-52 rounded-xl">
+            <SelectTrigger className="h-9 w-full rounded-xl sm:w-52">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -123,7 +123,7 @@ function UnitView() {
 
       <ExportableReportFrame ref={frameRef} title={title} period={periodLabel} subtitle="Skor = rata-rata capaian (%) terhadap target harian per unit">
         <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
-          <section className="rounded-2xl border border-border p-4">
+          <section className="min-w-0 rounded-2xl border border-border p-4">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-display text-base font-bold">{metric?.name ?? "Perbandingan unit"}</h3>
               {perUnitTarget !== null && metric && (
@@ -138,7 +138,7 @@ function UnitView() {
               <ChartContainer config={chartConfig} className="aspect-auto h-80 w-full">
                 <BarChart data={chartData} margin={{ left: 0, right: 8, top: 8, bottom: 40 }}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} angle={-35} textAnchor="end" interval={0} height={60} fontSize={11} />
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} angle={-35} textAnchor="end" interval="preserveStartEnd" minTickGap={10} height={60} fontSize={11} />
                   <YAxis tickLine={false} axisLine={false} width={64} fontSize={11} tickFormatter={(v: number) => formatCompact(v, "")} />
                   <ChartTooltip
                     content={<ChartTooltipContent formatter={(value) => formatMetricValue(Number(value), metric?.unit ?? "")} />}

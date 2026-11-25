@@ -1,8 +1,9 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import { Eye, Lock, ShieldCheck } from "lucide-react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Eye, Lock, MapPin, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { auth } from "@/lib/formkanwil/auth";
 import { useCurrentUser } from "@/lib/formkanwil/hooks";
 import type { User } from "@/lib/formkanwil/types";
 import { cn } from "@/lib/utils";
@@ -21,12 +22,27 @@ interface AdminAccess {
 
 const AccessContext = createContext<AdminAccess | null>(null);
 
+const DEMO_AREAS_SEEDED_KEY = "formkanwil:demo-areas-seeded:v2";
+
 export function AdminAccessProvider({ children }: { children: ReactNode }) {
   const user = useCurrentUser();
   const [open, setOpen] = useState(false);
   const openLogin = useCallback(() => setOpen(true), []);
   const isAdmin = user?.role === "admin";
-  const value = useMemo(() => ({ isAdmin, user: isAdmin ? user : null, openLogin }), [isAdmin, user, openLogin]);
+
+  // Pre-seed the 5 example regional area accounts once on first browser visit so they appear immediately in Akun & Akses.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (localStorage.getItem(DEMO_AREAS_SEEDED_KEY)) return;
+      localStorage.setItem(DEMO_AREAS_SEEDED_KEY, "1");
+      void auth.seedDemoAreaUsers();
+    } catch {
+      // Ignore storage access restrictions
+    }
+  }, []);
+
+  const value = useMemo(() => ({ isAdmin, user, openLogin }), [isAdmin, user, openLogin]);
   return (
     <AccessContext.Provider value={value}>
       {children}
@@ -61,12 +77,25 @@ export function AdminOnlyHint({ children, className }: { children: ReactNode; cl
 }
 
 export function ViewModeBadge({ className }: { className?: string }) {
-  const { isAdmin } = useAdminAccess();
-  return isAdmin ? (
-    <span className={cn("pill bg-lime text-primary-deep", className)}>
-      <ShieldCheck className="size-3" /> Admin Mode
-    </span>
-  ) : (
+  const { isAdmin, user } = useAdminAccess();
+  if (isAdmin) {
+    return (
+      <span className={cn("pill bg-lime text-primary-deep", className)}>
+        <ShieldCheck className="size-3" /> Admin Mode
+      </span>
+    );
+  }
+  if (user?.assignedArea) {
+    return (
+      <span
+        className={cn("pill bg-gold-soft text-gold-foreground", className)}
+        title={`Akun wilayah: hanya dapat mengakses Potensi Bisnis Area ${user.assignedArea}`}
+      >
+        <MapPin className="size-3" /> Area {user.assignedArea}
+      </span>
+    );
+  }
+  return (
     <span className={cn("pill bg-muted text-muted-foreground", className)} title="Kamu sedang melihat versi publik (read-only)">
       <Eye className="size-3" /> Mode Lihat
     </span>

@@ -56,10 +56,10 @@ function PublicFormEntryPage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-hero px-4 py-10 sm:px-6">
+    <main className="relative flex h-screen overflow-hidden bg-gradient-hero">
       <Blobs />
-      <div className="relative mx-auto max-w-xl">
-        <div className="mb-8 flex justify-center">
+      <div className="relative m-auto flex w-full max-w-xl flex-col px-4 py-6 sm:px-6">
+        <div className="mb-6 flex justify-center">
           <Link to="/app" aria-label="FormKanwil">
             <PegadaianLogo className="h-9" />
           </Link>

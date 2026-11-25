@@ -9,6 +9,8 @@ export interface User {
   email: string;
   tagline?: string;
   role: Role;
+  /** Assigned Pegadaian Area for regional accounts (used to scope Potensi Bisnis access). */
+  assignedArea?: string | null;
   active: boolean;
   /** SHA-256 hex of `${passwordSalt}:${password}`; checked only inside auth.ts. */
   passwordHash?: string;
@@ -120,12 +122,15 @@ export interface DailyReportConfig {
 
 export type ThemePresetId = "emerald" | "forest" | "teal" | "custom";
 export type ThemeFontId = "jakarta" | "inter" | "dmsans";
+export type ThemeMode = "light" | "dark" | "system";
 
 export interface ThemeSettings {
   preset: ThemePresetId;
   /** Used when preset is "custom". #RRGGBB */
   customPrimary: string;
   font: ThemeFontId;
+  /** Color mode: light, dark, or follow OS preference. */
+  mode?: ThemeMode;
   /** Data URLs (browser storage) until file storage is connected. */
   logoUrl: string | null;
   faviconUrl: string | null;
