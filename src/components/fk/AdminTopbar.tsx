@@ -148,59 +148,69 @@ export function AdminTopbar() {
     else navigate({ to: target.to });
   };
 
+  const activePageTitle = breadcrumbs[breadcrumbs.length - 1]?.label ?? "Dashboard Kinerja";
+
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-background/85 px-3 backdrop-blur-md sm:gap-3 sm:px-5">
-      <SidebarTrigger className="size-9 rounded-xl text-muted-foreground hover:bg-mint-soft hover:text-mint-foreground" />
-      <Separator orientation="vertical" className="hidden h-6 sm:block" />
+    <header className="sticky top-0 z-20 flex h-14 w-full items-center justify-between gap-2 border-b border-border bg-background/85 px-3 backdrop-blur-md sm:h-16 sm:gap-3 sm:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+        <SidebarTrigger className="size-9 shrink-0 rounded-xl text-muted-foreground hover:bg-mint-soft hover:text-mint-foreground" />
+        <Separator orientation="vertical" className="hidden h-5 sm:block" />
 
-      {/* Breadcrumbs */}
-      <Breadcrumb className="hidden sm:flex">
-        <BreadcrumbList>
-          {breadcrumbs.map((seg, i) => {
-            const isLast = i === breadcrumbs.length - 1;
-            return (
-              <BreadcrumbItem key={i}>
-                {!isLast ? (
-                  <>
-                    {seg.href ? (
-                      <BreadcrumbLink asChild>
-                        <Link to={seg.href as string} className="flex items-center gap-1 text-xs font-medium">
-                          {i === 0 && <Home className="size-3" />}
+        {/* Compact mobile title */}
+        <span className="min-w-0 flex-1 truncate font-display text-sm font-bold tracking-tight text-foreground sm:hidden">
+          {activePageTitle}
+        </span>
+
+        {/* Breadcrumbs (tablet & desktop) */}
+        <Breadcrumb className="hidden shrink-0 sm:flex">
+          <BreadcrumbList>
+            {breadcrumbs.map((seg, i) => {
+              const isLast = i === breadcrumbs.length - 1;
+              return (
+                <BreadcrumbItem key={i}>
+                  {!isLast ? (
+                    <>
+                      {seg.href ? (
+                        <BreadcrumbLink asChild>
+                          <Link to={seg.href as string} className="flex items-center gap-1 text-xs font-medium">
+                            {i === 0 && <Home className="size-3" />}
+                            {seg.label}
+                          </Link>
+                        </BreadcrumbLink>
+                      ) : (
+                        <span className="hidden items-center gap-1 text-xs font-medium text-muted-foreground md:flex">
                           {seg.label}
-                        </Link>
-                      </BreadcrumbLink>
-                    ) : (
-                      <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-                        {seg.label}
-                      </span>
-                    )}
-                    <BreadcrumbSeparator />
-                  </>
-                ) : (
-                  <BreadcrumbPage className="max-w-[200px] truncate text-xs font-semibold text-foreground">
-                    {seg.label}
-                  </BreadcrumbPage>
-                )}
-              </BreadcrumbItem>
-            );
-          })}
-        </BreadcrumbList>
-      </Breadcrumb>
+                        </span>
+                      )}
+                      <BreadcrumbSeparator className={!seg.href ? "hidden md:block" : undefined} />
+                    </>
+                  ) : (
+                    <BreadcrumbPage className="max-w-[140px] truncate text-xs font-semibold text-foreground md:max-w-[200px]">
+                      {seg.label}
+                    </BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+              );
+            })}
+          </BreadcrumbList>
+        </Breadcrumb>
 
-      {/* Command Search */}
-      <button
-        type="button"
-        onClick={() => setPaletteOpen(true)}
-        className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm text-muted-foreground shadow-card transition-colors hover:border-primary/30 sm:max-w-sm"
-      >
-        <Search className="size-4 shrink-0" />
-        <span className="truncate">Cari menu kinerja…</span>
-        <kbd className="ml-auto hidden rounded-md border border-border bg-muted px-1.5 py-0.5 font-sans text-[0.6875rem] font-semibold sm:inline">
-          ⌘K
-        </kbd>
-      </button>
+        {/* Command Search: compact icon on mobile, clean pill on sm+ */}
+        <button
+          type="button"
+          onClick={() => setPaletteOpen(true)}
+          aria-label="Cari menu kinerja"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground shadow-card transition-colors hover:border-primary/30 sm:h-9 sm:w-52 sm:justify-start sm:gap-2 sm:px-3 sm:text-xs md:w-64 lg:w-72"
+        >
+          <Search className="size-4 shrink-0" />
+          <span className="hidden truncate sm:inline">Cari menu kinerja…</span>
+          <kbd className="ml-auto hidden rounded-md border border-border bg-muted px-1.5 py-0.5 font-sans text-[0.6875rem] font-semibold md:inline">
+            ⌘K
+          </kbd>
+        </button>
+      </div>
 
-      <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+      <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2.5">
         <span className="hidden text-xs font-medium text-muted-foreground xl:inline">
           {format(new Date(), "EEEE, d MMMM yyyy", { locale: localeId })}
         </span>
@@ -212,16 +222,16 @@ export function AdminTopbar() {
           onClick={toggleColorMode}
           aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
           title={isDark ? "Mode Terang" : "Mode Gelap"}
-          className="rounded-xl text-muted-foreground hover:bg-mint-soft hover:text-mint-foreground"
+          className="size-9 rounded-xl text-muted-foreground hover:bg-mint-soft hover:text-mint-foreground"
         >
           {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </Button>
 
-        <ViewModeBadge className="hidden sm:inline-flex" />
+        <ViewModeBadge className="hidden md:inline-flex" />
 
         {!user && (
-          <Button size="sm" className="h-9" onClick={openLogin}>
-            <Lock /> <span className="hidden sm:inline">Masuk</span>
+          <Button size="sm" className="h-9 px-2.5 sm:px-3" onClick={openLogin}>
+            <Lock className="size-3.5" /> <span className="hidden sm:inline">Masuk</span>
           </Button>
         )}
         {user && (

@@ -22,11 +22,11 @@ function AdminLayout() {
 
   return (
     <AdminAccessProvider>
-      <SidebarProvider style={{ "--sidebar-width": "17rem", "--sidebar-width-icon": "4.25rem" } as React.CSSProperties}>
+      <SidebarProvider style={{ "--sidebar-width": "17.5rem", "--sidebar-width-icon": "4.25rem" } as React.CSSProperties}>
         <AppSidebar />
-        <SidebarInset className="min-w-0 bg-background">
+        <SidebarInset className="min-w-0 overflow-x-clip bg-background">
           <AdminTopbar />
-          <div key={pathname} className="mx-auto w-full max-w-[90rem] animate-page-in px-4 py-6 pb-28 sm:px-6 lg:px-8">
+          <div key={pathname} className="mx-auto w-full max-w-7xl animate-page-in px-3.5 py-4 pb-16 sm:px-6 sm:py-6 sm:pb-24 lg:px-8">
             <Outlet />
           </div>
         </SidebarInset>

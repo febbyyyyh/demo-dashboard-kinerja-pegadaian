@@ -114,7 +114,7 @@ function Flyout({ item, pathname }: { item: NavItem; pathname: string }) {
 }
 
 const menuButtonClass =
-  "h-10 rounded-xl px-3 font-medium text-sidebar-foreground data-[active=true]:font-semibold group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!p-3";
+  "h-10 rounded-xl px-3 text-[13px] font-medium text-sidebar-foreground data-[active=true]:font-semibold group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!p-3";
 
 function NavEntry({ item, pathname }: { item: NavItem; pathname: string }) {
   const { state, isMobile, setOpenMobile } = useSidebar();

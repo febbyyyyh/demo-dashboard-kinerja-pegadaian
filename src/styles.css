@@ -376,9 +376,30 @@
   mix-blend-mode: multiply;
 }
 
-/* Clean layout during JPEG export: hide toolbars and remove scrollbars so no row is clipped. */
-[data-exporting-jpeg="true"] [data-export-ignore="true"] {
+/* Clean layout during JPEG export: hide toolbars, switch mobile cards to full desktop table, and remove scrollbars so no row is clipped. */
+[data-exporting-jpeg="true"] {
+  overflow: visible !important;
+}
+
+[data-exporting-jpeg="true"] [data-export-ignore="true"],
+[data-exporting-jpeg="true"] [data-mobile-cards="true"] {
   display: none !important;
+}
+
+[data-exporting-jpeg="true"] [data-export-table="true"] {
+  display: block !important;
+}
+
+[data-exporting-jpeg="true"] [data-export-header="true"] {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+[data-exporting-jpeg="true"] [data-export-meta="true"] {
+  border-top: 0 !important;
+  padding-top: 0 !important;
+  text-align: right !important;
 }
 
 [data-exporting-jpeg="true"] .overflow-auto,
@@ -386,6 +407,13 @@
 [data-exporting-jpeg="true"] .overflow-y-auto {
   overflow: visible !important;
   max-height: none !important;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* ---------- Motion ---------- */

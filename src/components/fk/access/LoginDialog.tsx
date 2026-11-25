@@ -66,7 +66,7 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-2xl sm:max-w-sm">
+      <DialogContent className="max-h-[92dvh] w-[calc(100vw-1.5rem)] overflow-y-auto rounded-2xl p-5 sm:max-w-sm sm:p-6">
         <DialogHeader>
           <span className="mb-2 grid size-12 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-brand">
             <ShieldCheck className="size-6" />

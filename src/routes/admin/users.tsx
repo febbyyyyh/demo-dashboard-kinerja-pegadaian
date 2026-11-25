@@ -128,8 +128,8 @@ function AccessContent() {
         subtitle="Kelola akun administrator Kanwil dan akun per wilayah/area untuk akses terbatas Potensi Bisnis."
       />
 
-      <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
-        <section className="panel p-5 sm:p-6">
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-[1.3fr_1fr]">
+        <section className="panel p-4 sm:p-6">
           <div className="flex flex-wrap items-center gap-4">
             <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-brand">
               <ShieldCheck className="size-6" />
@@ -216,18 +216,18 @@ function AccessContent() {
       </div>
 
       {/* ── AKUN WILAYAH / AREA MANAGEMENT ─────────────────────────────────── */}
-      <section className="panel space-y-5 p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="font-display text-lg font-extrabold tracking-tight">
+      <section className="panel space-y-4 p-4 sm:space-y-5 sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h2 className="font-display text-base font-extrabold tracking-tight sm:text-lg">
               Akun Wilayah / Area (Khusus Potensi Bisnis)
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
               Tetapkan wilayah untuk tiap akun karyawan/area agar modul Potensi Bisnis terkunci pada area masing-masing.
               Password default akun contoh: <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs font-semibold text-foreground">{DEMO_AREA_PASSWORD}</code>
             </p>
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={() => void onSeedDemoAreas()}>
+          <Button type="button" variant="outline" size="sm" className="w-full shrink-0 sm:w-auto" onClick={() => void onSeedDemoAreas()}>
             <Sparkles className="size-4 text-primary" /> Pulihkan 5 Akun Contoh Area
           </Button>
         </div>
@@ -235,7 +235,7 @@ function AccessContent() {
         {/* Create new area account form */}
         <form
           onSubmit={areaForm.handleSubmit(onCreateAreaUser)}
-          className="grid gap-3 rounded-2xl border border-border bg-muted/30 p-4 sm:grid-cols-2 lg:grid-cols-5"
+          className="grid gap-3 rounded-2xl border border-border bg-muted/30 p-3.5 sm:grid-cols-2 sm:p-4 lg:grid-cols-5"
           noValidate
         >
           <div className="space-y-1">
@@ -280,7 +280,7 @@ function AccessContent() {
             />
             {fieldError(areaForm.formState.errors.assignedArea?.message)}
           </div>
-          <div className="flex items-end">
+          <div className="flex items-end sm:col-span-2 lg:col-span-1">
             <Button type="submit" className="w-full" disabled={areaForm.formState.isSubmitting}>
               <Plus className="size-4" /> Tambah Akun
             </Button>
@@ -294,25 +294,35 @@ function AccessContent() {
             <strong className="text-foreground">Buat 5 Akun Demo Area</strong> untuk uji coba cepat.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <Table className="min-w-[600px]">
-              <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead>Nama &amp; Username</TableHead>
-                  <TableHead>Wilayah Potensi Bisnis</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {areaUsers.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <div className="font-semibold text-foreground">{item.name}</div>
-                      <div className="font-mono text-xs text-muted-foreground">@{item.username}</div>
-                    </TableCell>
-                    <TableCell>
-                      {KINERJA_AREAS.some((area) => `area.${area.toLowerCase()}` === item.username.toLowerCase()) ? (
+          <>
+            {/* Mobile card list (< sm) */}
+            <div className="space-y-2.5 sm:hidden">
+              {areaUsers.map((item) => {
+                const isBuiltIn = KINERJA_AREAS.some(
+                  (area) => `area.${area.toLowerCase()}` === item.username.toLowerCase(),
+                );
+                return (
+                  <div key={item.id} className="space-y-2.5 rounded-xl border border-border bg-background/60 p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold text-foreground">{item.name}</div>
+                        <div className="truncate font-mono text-xs text-muted-foreground">@{item.username}</div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 shrink-0 px-2 text-destructive-foreground hover:bg-destructive-soft"
+                        onClick={() => {
+                          auth.removeAreaUser(item.id);
+                          toast.info(`Akun @${item.username} dihapus`);
+                        }}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-2.5">
+                      {isBuiltIn ? (
                         <Badge className="gap-1.5 rounded-full border-0 bg-gold-soft px-3 py-1 text-xs font-semibold text-gold-foreground hover:bg-gold-soft">
                           <MapPin className="size-3" /> Area {item.assignedArea}
                         </Badge>
@@ -325,7 +335,7 @@ function AccessContent() {
                             toast.success(`Wilayah ${item.name} diubah ke Area ${value}`);
                           }}
                         >
-                          <SelectTrigger className="h-9 w-44 rounded-xl">
+                          <SelectTrigger className="h-8 w-40 rounded-xl text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -337,8 +347,6 @@ function AccessContent() {
                           </SelectContent>
                         </Select>
                       )}
-                    </TableCell>
-                    <TableCell>
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={item.active}
@@ -352,26 +360,92 @@ function AccessContent() {
                           {item.active ? "Aktif" : "Nonaktif"}
                         </span>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive-foreground hover:bg-destructive-soft"
-                        onClick={() => {
-                          auth.removeAreaUser(item.id);
-                          toast.info(`Akun @${item.username} dihapus`);
-                        }}
-                      >
-                        <Trash2 className="size-4" /> Hapus
-                      </Button>
-                    </TableCell>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop & tablet table (sm+) */}
+            <div className="hidden overflow-x-auto rounded-xl border border-border sm:block">
+              <Table className="min-w-[600px]">
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead>Nama &amp; Username</TableHead>
+                    <TableHead>Wilayah Potensi Bisnis</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {areaUsers.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        <div className="font-semibold text-foreground">{item.name}</div>
+                        <div className="font-mono text-xs text-muted-foreground">@{item.username}</div>
+                      </TableCell>
+                      <TableCell>
+                        {KINERJA_AREAS.some((area) => `area.${area.toLowerCase()}` === item.username.toLowerCase()) ? (
+                          <Badge className="gap-1.5 rounded-full border-0 bg-gold-soft px-3 py-1 text-xs font-semibold text-gold-foreground hover:bg-gold-soft">
+                            <MapPin className="size-3" /> Area {item.assignedArea}
+                          </Badge>
+                        ) : (
+                          <Select
+                            value={item.assignedArea ?? KINERJA_AREAS[0]}
+                            onValueChange={(value) => {
+                              if (!value || value === item.assignedArea) return;
+                              auth.updateAreaUser(item.id, { assignedArea: value as KinerjaArea });
+                              toast.success(`Wilayah ${item.name} diubah ke Area ${value}`);
+                            }}
+                          >
+                            <SelectTrigger className="h-9 w-44 rounded-xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {KINERJA_AREAS.map((area) => (
+                                <SelectItem key={area} value={area}>
+                                  Area {area}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={item.active}
+                            onCheckedChange={(active) => {
+                              auth.updateAreaUser(item.id, { active });
+                              toast.info(active ? `Akun ${item.username} diaktifkan` : `Akun ${item.username} dinonaktifkan`);
+                            }}
+                            aria-label={item.active ? "Nonaktifkan akun area" : "Aktifkan akun area"}
+                          />
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {item.active ? "Aktif" : "Nonaktif"}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive-foreground hover:bg-destructive-soft"
+                          onClick={() => {
+                            auth.removeAreaUser(item.id);
+                            toast.info(`Akun @${item.username} dihapus`);
+                          }}
+                        >
+                          <Trash2 className="size-4" /> Hapus
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </section>
     </div>

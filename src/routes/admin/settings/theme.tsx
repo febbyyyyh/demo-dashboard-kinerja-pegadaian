@@ -51,6 +51,7 @@ function ThemePage() {
         action={
           <Button
             variant="outline"
+            className="w-full sm:w-auto"
             onClick={() => {
               repository.theme.save(createDefaultTheme());
               toast.success("Tema dikembalikan ke Pegadaian Emerald");
@@ -61,9 +62,9 @@ function ThemePage() {
         }
       />
 
-      <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
-        <div className="space-y-5">
-          <section className="panel p-5 sm:p-6">
+      <div className="grid gap-4 sm:gap-5 xl:grid-cols-[1.5fr_1fr]">
+        <div className="min-w-0 space-y-4 sm:space-y-5">
+          <section className="panel p-4 sm:p-6">
             <h2 className="font-display text-lg font-extrabold tracking-tight">Mode tampilan</h2>
             <p className="text-sm text-muted-foreground">Pilih tema terang, gelap, atau mengikuti pengaturan sistem perangkat.</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -97,7 +98,7 @@ function ThemePage() {
             </div>
           </section>
 
-          <section className="panel p-5 sm:p-6">
+          <section className="panel p-4 sm:p-6">
             <h2 className="font-display text-lg font-extrabold tracking-tight">Palet warna</h2>
             <p className="text-sm text-muted-foreground">Mengubah --primary, --sidebar-accent, gradien kartu, dan grafik.</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -157,7 +158,7 @@ function ThemePage() {
             </div>
           </section>
 
-          <section className="panel p-5 sm:p-6">
+          <section className="panel p-4 sm:p-6">
             <h2 className="font-display text-lg font-extrabold tracking-tight">Tipografi</h2>
             <p className="text-sm text-muted-foreground">Font antarmuka untuk dashboard dan laporan.</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -183,7 +184,7 @@ function ThemePage() {
             </div>
           </section>
 
-          <section className="panel p-5 sm:p-6">
+          <section className="panel p-4 sm:p-6">
             <h2 className="font-display text-lg font-extrabold tracking-tight">Aset branding</h2>
             <p className="text-sm text-muted-foreground">PNG, JPG, atau SVG maksimal 600 KB. Disimpan di browser ini sampai penyimpanan file terhubung.</p>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -202,19 +203,19 @@ function ThemePage() {
           </section>
         </div>
 
-        <aside className="space-y-4 xl:sticky xl:top-20 xl:self-start">
+        <aside className="min-w-0 space-y-4 xl:sticky xl:top-20 xl:self-start">
           <div className="eyebrow">Pratinjau langsung</div>
           <div className="panel overflow-hidden">
             <div className="flex">
-              <div className="w-16 shrink-0 space-y-2 border-r border-border bg-sidebar p-3">
-                <span className="grid size-10 place-items-center rounded-xl bg-gradient-brand text-xs font-extrabold text-primary-foreground">FK</span>
+              <div className="w-12 shrink-0 space-y-2 border-r border-border bg-sidebar p-2 sm:w-16 sm:p-3">
+                <span className="grid size-8 place-items-center rounded-xl bg-gradient-brand text-[11px] font-extrabold text-primary-foreground sm:size-10 sm:text-xs">FK</span>
                 {[0, 1, 2, 3].map((i) => (
-                  <span key={i} className={cn("relative block h-10 rounded-xl", i === 1 ? "bg-sidebar-accent" : "bg-muted")}>
-                    {i === 1 && <span className="absolute -left-3 top-1 bottom-1 w-1 rounded-r-full bg-primary" />}
+                  <span key={i} className={cn("relative block h-8 rounded-xl sm:h-10", i === 1 ? "bg-sidebar-accent" : "bg-muted")}>
+                    {i === 1 && <span className="absolute -left-2 top-1 bottom-1 w-1 rounded-r-full bg-primary sm:-left-3" />}
                   </span>
                 ))}
               </div>
-              <div className="flex-1 space-y-3 bg-background p-4">
+              <div className="min-w-0 flex-1 space-y-3 bg-background p-3 sm:p-4">
                 <PegadaianLogo className="h-7" />
                 <div className="rounded-2xl bg-gradient-hero-card p-4 text-on-hero">
                   <div className="text-xs text-on-hero-muted">Total Jawaban Masuk</div>
