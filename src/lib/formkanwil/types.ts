@@ -16,7 +16,7 @@ export interface User {
   passwordHash?: string;
   passwordSalt?: string;
   /** Identity provider used to sign in. */
-  provider?: "password" | "google";
+  provider?: "password" | "google" | "email_otp";
   avatarUrl?: string;
   createdAt: string;
 }

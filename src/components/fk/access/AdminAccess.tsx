@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Eye, Lock, MapPin, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -30,9 +31,10 @@ export function AdminAccessProvider({ children }: { children: ReactNode }) {
   const openLogin = useCallback(() => setOpen(true), []);
   const isAdmin = user?.role === "admin";
 
-  // Pre-seed the 5 example regional area accounts once on first browser visit so they appear immediately in Akun & Akses.
+  // Pre-seed the 5 example regional area accounts once on first browser visit in local mode.
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (auth.mode === "cloud") return;
     try {
       if (localStorage.getItem(DEMO_AREAS_SEEDED_KEY)) return;
       localStorage.setItem(DEMO_AREAS_SEEDED_KEY, "1");
@@ -40,6 +42,26 @@ export function AdminAccessProvider({ children }: { children: ReactNode }) {
     } catch {
       // Ignore storage access restrictions
     }
+  }, []);
+
+  // Hydrate and listen to Supabase Auth sessions (Google OAuth redirect + Email OTP).
+  useEffect(() => {
+    return auth.initSessionListener((event) => {
+      if (event.status === "unauthorized") {
+        toast.error("Akses belum terdaftar", { description: event.error });
+        return;
+      }
+      if (event.status === "signed_in" && event.fresh) {
+        toast.success(`Selamat datang, ${event.user.name}`, {
+          description:
+            event.user.role === "admin"
+              ? "Admin Mode aktif — kamu bisa mengakses dan mengelola semua wilayah."
+              : event.user.assignedArea
+                ? `Akses Potensi Bisnis aktif untuk Area ${event.user.assignedArea}.`
+                : "Kamu berhasil masuk.",
+        });
+      }
+    });
   }, []);
 
   const value = useMemo(() => ({ isAdmin, user, openLogin }), [isAdmin, user, openLogin]);

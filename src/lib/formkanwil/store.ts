@@ -23,6 +23,7 @@ const LEGACY_SESSION_KEY = "formkanwil:session:v1";
 const SERVER_SNAPSHOT = createInitialDatabase();
 let dbCache: Database | null = null;
 let sessionCache: string | null | undefined;
+let cloudUserCache: User | null = null;
 const listeners = new Set<() => void>();
 
 type PreviousDatabase = Omit<
@@ -182,7 +183,17 @@ export function setSession(userId: string | null) {
   emit();
 }
 
+export function getCloudUser(): User | null {
+  return cloudUserCache;
+}
+
+export function setCloudUser(user: User | null) {
+  cloudUserCache = user;
+  emit();
+}
+
 export function getCurrentUser(): User | null {
+  if (cloudUserCache && cloudUserCache.active) return cloudUserCache;
   const id = getSessionUserId();
   if (!id) return null;
   const user = getDb().users.find((u) => u.id === id);
@@ -195,7 +206,9 @@ export function useDb(): Database {
 
 export function useCurrentUser(): User | null {
   const db = useDb();
+  const cloudUser = useSyncExternalStore(subscribe, getCloudUser, () => null);
   const id = useSyncExternalStore(subscribe, getSessionUserId, () => null);
+  if (cloudUser && cloudUser.active) return cloudUser;
   if (!id) return null;
   const user = db.users.find((u) => u.id === id);
   return user && user.active ? user : null;

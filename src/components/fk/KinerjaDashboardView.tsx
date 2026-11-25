@@ -263,7 +263,7 @@ export function KinerjaDashboardView({ slug }: { slug: string }) {
         </p>
         <div className="mt-5 flex w-full flex-col gap-2 sm:mt-6 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-center">
           <Button onClick={openLogin} className="w-full sm:w-auto">
-            <ShieldCheck className="size-4" /> Masuk (Username &amp; Password)
+            <ShieldCheck className="size-4" /> Masuk (Google / Kode Email)
           </Button>
           <Button asChild variant="outline" className="w-full sm:w-auto">
             <Link to="/admin">Kembali ke Home</Link>

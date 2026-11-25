@@ -207,4 +207,37 @@ describe("Dashboard Kinerja domain, Unit/Cabang/Area rollups & access control", 
       localStorage.clear();
     }
   });
+
+  it("supports Option A 6-digit email OTP flow and enforces area scoping", async () => {
+    vi.resetModules();
+    const { auth: freshAuth } = await import("@/lib/formkanwil/auth");
+    try {
+      const req = await freshAuth.requestEmailOtp("area.palu@kanwil.pegadaian.co.id");
+      expect(req.ok).toBe(true);
+      if (!req.ok) return;
+      expect(req.mode).toBe("local");
+      expect(req.demoCode).toMatch(/^\d{6}$/);
+
+      // Wrong code is rejected
+      const wrongCode = req.demoCode === "000000" ? "111111" : "000000";
+      const wrong = await freshAuth.verifyEmailOtp("area.palu@kanwil.pegadaian.co.id", wrongCode);
+      expect(wrong.ok).toBe(false);
+
+      // Valid 6-digit code signs in and scopes Potensi Bisnis to Area Palu
+      const verified = await freshAuth.verifyEmailOtp("area.palu@kanwil.pegadaian.co.id", req.demoCode!);
+      expect(verified.ok).toBe(true);
+      if (!verified.ok) return;
+      expect(verified.user.assignedArea).toBe("Palu");
+      expect(resolvePotensiAccess(verified.user)).toEqual({ allowed: true, lockedArea: "Palu" });
+
+      // Unregistered email is rejected
+      const stranger = await freshAuth.requestEmailOtp("stranger@example.com");
+      expect(stranger.ok).toBe(false);
+
+      await freshAuth.signOut();
+    } finally {
+      sessionStorage.clear();
+      localStorage.clear();
+    }
+  });
 });
