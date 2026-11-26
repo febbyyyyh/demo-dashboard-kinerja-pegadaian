@@ -72,7 +72,7 @@ export async function exportTablePdf(table: ExportTable) {
   doc.text(table.title, 30, 34);
   doc.setFontSize(9);
   doc.setTextColor(100, 116, 139);
-  doc.text(`PT Pegadaian Kantor Wilayah Manado · Periode ${table.period} · Dicetak ${printedAt()}`, 30, 50);
+  doc.text(`Dashboard Kinerja Regional (Demo Portofolio) · Periode ${table.period} · Dicetak ${printedAt()}`, 30, 50);
   doc.setTextColor(15, 23, 42);
   autoTable(doc, {
     head: [table.columns],

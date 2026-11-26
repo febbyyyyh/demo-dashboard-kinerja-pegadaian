@@ -231,7 +231,7 @@ export function AppSidebar() {
             <span className="block font-display text-base font-extrabold leading-tight tracking-tight text-foreground">
               Dashboard Kinerja
             </span>
-            <span className="block truncate text-xs text-muted-foreground">Kanwil Manado</span>
+            <span className="block truncate text-xs text-muted-foreground">Demo Portofolio</span>
           </span>
         </NavAnchor>
       </SidebarHeader>

@@ -28,7 +28,7 @@ export const ExportableReportFrame = forwardRef<HTMLDivElement, ExportableReport
           <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
             <PegadaianLogo className="h-8 shrink-0 sm:h-9" />
             <div className="min-w-0 flex-1">
-              <div className="eyebrow leading-snug">PT Pegadaian · Kantor Wilayah Manado</div>
+              <div className="eyebrow leading-snug">Dashboard Kinerja Regional · Demo Portofolio</div>
               <h2 className="mt-0.5 break-words font-display text-base font-extrabold leading-snug tracking-tight sm:text-lg">
                 {title}
               </h2>

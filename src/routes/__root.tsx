@@ -83,19 +83,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "FormKanwil — Pegadaian Kanwil Manado" },
+      { title: "Dashboard Kinerja Regional — Demo Portofolio" },
       {
         name: "description",
         content:
-          "Platform pengumpulan data dan Daily Report PT Pegadaian Kantor Wilayah Manado.",
+          "Demo portofolio aplikasi Dashboard Kinerja Regional dengan agregasi Area–Cabang–Unit, autentikasi Google & OTP Email, serta ekspor laporan resmi.",
       },
-      { name: "author", content: "Pegadaian Kanwil" },
+      { name: "author", content: "Portfolio Demo" },
       { name: "theme-color", content: "#146C43" },
-      { property: "og:title", content: "FormKanwil — Pegadaian Kanwil Manado" },
+      { property: "og:title", content: "Dashboard Kinerja Regional — Demo Portofolio" },
       {
         property: "og:description",
         content:
-          "Platform pengumpulan data dan Daily Report PT Pegadaian Kantor Wilayah Manado.",
+          "Demo portofolio aplikasi Dashboard Kinerja Regional (data simulasi).",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
