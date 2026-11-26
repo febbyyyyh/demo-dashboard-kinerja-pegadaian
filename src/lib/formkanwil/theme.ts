@@ -63,6 +63,13 @@ export function resolveThemeMode(mode: ThemeMode = "light"): "light" | "dark" {
   return "light";
 }
 
+const DEFAULT_FAVICON_HREF = "/favicon.svg?v=2";
+
+function mimeTypeFromDataUrl(dataUrl: string): string | undefined {
+  const match = /^data:([^;,]+)[;,]/i.exec(dataUrl);
+  return match?.[1];
+}
+
 /** Writes the theme into the CSS variables read by src/styles.css — live, no rebuild. */
 export function applyTheme(theme: ThemeSettings, root: HTMLElement = document.documentElement) {
   const palette = paletteFor(theme);
@@ -77,17 +84,20 @@ export function applyTheme(theme: ThemeSettings, root: HTMLElement = document.do
   root.classList.toggle("dark", resolvedMode === "dark");
   root.dataset["theme"] = resolvedMode;
 
-  if (theme.faviconUrl) {
-    let link = document.querySelector<HTMLLinkElement>("link[data-fk-favicon]");
-    if (!link) {
-      link = document.createElement("link");
-      link.rel = "icon";
-      link.dataset["fkFavicon"] = "true";
-      document.head.appendChild(link);
+  if (typeof document !== "undefined" && document.head) {
+    const href = theme.faviconUrl || DEFAULT_FAVICON_HREF;
+    const type = theme.faviconUrl ? mimeTypeFromDataUrl(theme.faviconUrl) : "image/svg+xml";
+
+    let iconLink = document.head.querySelector<HTMLLinkElement>("#fk-app-favicon");
+    if (!iconLink) {
+      iconLink = document.createElement("link");
+      iconLink.id = "fk-app-favicon";
+      iconLink.rel = "icon";
+      document.head.appendChild(iconLink);
     }
-    link.href = theme.faviconUrl;
-  } else {
-    document.querySelector("link[data-fk-favicon]")?.remove();
+    if (type) iconLink.setAttribute("type", type);
+    else iconLink.removeAttribute("type");
+    iconLink.setAttribute("href", href);
   }
 }
 

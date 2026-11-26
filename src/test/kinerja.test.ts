@@ -209,6 +209,9 @@ describe("Dashboard Kinerja domain, Unit/Cabang/Area rollups & access control", 
   });
 
   it("supports Option A 6-digit email OTP flow and enforces area scoping", async () => {
+    vi.stubEnv("VITE_SUPABASE_URL", "");
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", "");
+    vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "");
     vi.resetModules();
     const { auth: freshAuth } = await import("@/lib/formkanwil/auth");
     try {
@@ -236,6 +239,7 @@ describe("Dashboard Kinerja domain, Unit/Cabang/Area rollups & access control", 
 
       await freshAuth.signOut();
     } finally {
+      vi.unstubAllEnvs();
       sessionStorage.clear();
       localStorage.clear();
     }

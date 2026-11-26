@@ -105,8 +105,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.svg?v=2", type: "image/svg+xml" },
-      { rel: "alternate icon", href: "/favicon.ico?v=2", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -127,6 +125,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="id">
       <head>
         <HeadContent />
+        <link id="fk-app-favicon" rel="icon" href="/favicon.svg?v=2" />
       </head>
       <body>
         {children}
