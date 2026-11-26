@@ -25,7 +25,6 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { Label } from "@/components/ui/label";
 import {
   auth,
-  DEMO_AREA_PASSWORD,
   emailOtpRequestSchema,
   type EmailOtpRequestValues,
 } from "@/lib/formkanwil/auth";
@@ -158,18 +157,11 @@ export function DemoLoginGate() {
     toast.success(`Selamat datang, ${result.user.name}`);
   }
 
-  async function enterDemo(role: "admin" | "area") {
+  function enterDemo(role: "admin" | "area") {
     setError(null);
     setDemoLoading(role);
-    const result =
-      role === "admin"
-        ? await auth.signIn({ username: "admin", password: "Kanwil@2026" })
-        : await auth.signIn({ username: "area.manado", password: DEMO_AREA_PASSWORD });
+    auth.signInAsDemo(role);
     setDemoLoading(null);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
     toast.success(
       role === "admin"
         ? "Masuk Mode Demo (Akses Penuh Admin)"

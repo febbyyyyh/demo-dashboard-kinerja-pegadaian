@@ -140,6 +140,8 @@ export interface AuthAdapter {
   initSessionListener(onEvent?: (event: CloudSyncEvent) => void): () => void;
   /** Legacy / local demo username + password sign-in. */
   signIn(values: LoginValues): Promise<SignInResult>;
+  /** Portfolio demo instant sign-in (bypasses local password state for 1-click reviewer access). */
+  signInAsDemo(role: "admin" | "area"): User;
   signOut(): Promise<void>;
   updateCredentials(userId: string, values: CredentialsValues): Promise<UpdateResult>;
   createAreaUser(values: AreaUserValues): Promise<AreaUserResult>;
@@ -524,6 +526,35 @@ const authAdapter: AuthAdapter = {
     }
     setSession(user.id);
     return { ok: true, user };
+  },
+
+  signInAsDemo(role) {
+    const demoUser: User =
+      role === "admin"
+        ? {
+            id: "demo_admin",
+            username: "demo.admin",
+            name: "Demo Admin (Portofolio)",
+            email: "demo.admin@portfolio.local",
+            role: "admin",
+            assignedArea: null,
+            active: true,
+            provider: "email_otp",
+            createdAt: new Date().toISOString(),
+          }
+        : {
+            id: "demo_area_manado",
+            username: "demo.area.manado",
+            name: "Demo Area Manado",
+            email: "demo.manado@portfolio.local",
+            role: "user",
+            assignedArea: "Manado",
+            active: true,
+            provider: "email_otp",
+            createdAt: new Date().toISOString(),
+          };
+    setCloudUser(demoUser);
+    return demoUser;
   },
 
   async signOut() {
